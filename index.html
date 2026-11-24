@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>La Crosta.cl | Administración y Producción</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary-crust: #8B4513;
+            --secondary-dough: #F5E6D3;
+            --accent-gold: #D97706;
+        }
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .navbar {
+            background-color: var(--primary-crust) !important;
+        }
+        .kpi-card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            transition: transform 0.2s;
+        }
+        .kpi-card:hover {
+            transform: translateY(-3px);
+        }
+        .nav-pills .nav-link.active {
+            background-color: var(--primary-crust);
+        }
+        .nav-pills .nav-link {
+            color: var(--primary-crust);
+            font-weight: 500;
+        }
+        .btn-crust {
+            background-color: var(--primary-crust);
+            color: white;
+        }
+        .btn-crust:hover {
+            background-color: #6e360f;
+            color: white;
+        }
+        .table-responsive {
+            border-radius: 8px;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-dark mb-4 shadow-sm">
+    <div class="container">
+        <a class="navbar-brand fw-bold d-flex align-items-center" href="#">
+            <i class="bi bi-shop me-2 fs-4"></i> La Crosta.cl <span class="badge bg-warning text-dark ms-2 fs-6">Gestión</span>
+        </a>
+        <span class="text-white-50 small" id="connection-status">
+            <i class="bi bi-circle-fill text-warning"></i> Conectando...
+        </span>
+    </div>
+</nav>
+
+<div class="container pb-5">
+    <!-- KPIs Resumen Financiero -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="card kpi-card h-100 border-start border-success border-4">
+                <div class="card-body">
+                    <h6 class="text-muted small text-uppercase">Ventas Totales</h6>
+                    <h3 class="fw-bold text-success mb-0" id="kpi-ventas">$0</h3>
+                    <small class="text-muted" id="kpi-unidades">0 unid. vendidas</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card kpi-card h-100 border-start border-danger border-4">
+                <div class="card-body">
+                    <h6 class="text-muted small text-uppercase">Costos + Gastos</h6>
+                    <h3 class="fw-bold text-danger mb-0" id="kpi-egresos">$0</h3>
+                    <small class="text-muted">Insumos y operativos</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card kpi-card h-100 border-start border-primary border-4">
+                <div class="card-body">
+                    <h6 class="text-muted small text-uppercase">Utilidad Neta</h6>
+                    <h3 class="fw-bold text-primary mb-0" id="kpi-utilidad">$0</h3>
+                    <small class="text-muted" id="kpi-margen">Margen: 0%</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card kpi-card h-100 border-start border-warning border-4">
+                <div class="card-body">
+                    <h6 class="text-muted small text-uppercase">Valor Inventario</h6>
+                    <h3 class="fw-bold text-dark mb-0" id="kpi-inventario">$0</h3>
+                    <small class="text-muted">En materias primas</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navegación por Pestañas -->
+    <ul class="nav nav-pills mb-4 bg-white p-2 rounded shadow-sm justify-content-center justify-content-md-start" id="pills-tab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="tab-operaciones" data-bs-toggle="pill" data-bs-target="#pills-operaciones" type="button">
+                <i class="bi bi-cart-check me-1"></i> Ventas y Gastos
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="tab-produccion" data-bs-toggle="pill" data-bs-target="#pills-produccion" type="button">
+                <i class="bi bi-fire me-1"></i> Producción (Hornear)
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="tab-recetas" data-bs-toggle="pill" data-bs-target="#pills-recetas" type="button">
+                <i class="bi bi-journal-text me-1"></i> Recetas y Costos
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="tab-inventario" data-bs-toggle="pill" data-bs-target="#pills-inventario" type="button">
+                <i class="bi bi-box-seam me-1"></i> Stock Insumos
+            </button>
+        </li>
+    </ul>
+
+    <!-- Contenido de Pestañas -->
+    <div class="tab-content" id="pills-tabContent">
+        
+        <!-- 1. VENTAS Y GASTOS -->
+        <div class="tab-pane fade show active" id="pills-operaciones">
+            <div class="row g-4">
+                <!-- Registrar Venta -->
+                <div class="col-md-6">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-success text-white fw-bold">
+                            <i class="bi bi-plus-circle me-1"></i> Registrar Venta de Pan
+                        </div>
+                        <div class="card-body">
+                            <form id="form-venta">
+                                <div class="mb-3">
+                                    <label class="form-label">Producto (Stock Disponible)</label>
+                                    <select class="form-select" id="venta-producto" required>
+                                        <option value="">Selecciona un producto...</option>
+                                    </select>
+                                </div>
+                                <div class="row g-2 mb-3">
+                                    <div class="col-6">
+                                        <label class="form-label">Unidades Vendidas</label>
+                                        <input type="number" class="form-control" id="venta-cantidad" min="1" required>
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="form-label">Precio Venta Unit. ($)</label>
+                                        <input type="number" class="form-control" id="venta-precio" min="1" required>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Cliente / Carro (Opcional)</label>
+                                    <input type="text" class="form-control" id="venta-cliente" placeholder="Ej: Carro Plaza Melipilla">
+                                </div>
+                                <button type="submit" class="btn btn-success w-100 fw-bold">Guardar Venta</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Registrar Gasto Operativo -->
+                <div class="col-md-6">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-danger text-white fw-bold">
+                            <i class="bi bi-dash-circle me-1"></i> Registrar Gasto Operativo
+                        </div>
+                        <div class="card-body">
+                            <form id="form-gasto">
+                                <div class="mb-3">
+                                    <label class="form-label">Descripción del Gasto</label>
+                                    <input type="text" class="form-control" id="gasto-desc" placeholder="Ej: Balón de Gas 15kg, Bencina reparto..." required>
+                                </div>
+                                <div class="row g-2 mb-3">
+                                    <div class="col-6">
+                                        <label class="form-label">Categoría</label>
+                                        <select class="form-select" id="gasto-cat">
+                                            <option value="Energía/Gas">Energía / Gas</option>
+                                            <option value="Transporte">Transporte / Bencina</option>
+                                            <option value="Empaque">Empaque / Etiquetas</option>
+                                            <option value="Otros">Otros Gastos</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="form-label">Monto Total ($)</label>
+                                        <input type="number" class="form-control" id="gasto-monto" min="1" required>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-danger w-100 fw-bold">Registrar Gasto</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Historial de Movimientos -->
+                <div class="col-12">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-white fw-bold">Historial de Ventas y Gastos</div>
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Fecha</th>
+                                        <th>Tipo</th>
+                                        <th>Detalle</th>
+                                        <th>Unidades</th>
+                                        <th>Costo Prod.</th>
+                                        <th>Monto Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabla-movimientos"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. PRODUCCIÓN (HORNEAR) -->
+        <div class="tab-pane fade" id="pills-produccion">
+            <div class="row g-4">
+                <div class="col-md-5">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header btn-crust fw-bold">
+                            <i class="bi bi-fire me-1"></i> Registrar Tanda de Producción
+                        </div>
+                        <div class="card-body">
+                            <p class="small text-muted">Al producir, el sistema descontará automáticamente los gramos/unidades de tus insumos según la receta y cargará los panes al stock de venta.</p>
+                            <form id="form-produccion">
+                                <div class="mb-3">
+                                    <label class="form-label">Receta a Producir</label>
+                                    <select class="form-select" id="prod-receta" required>
+                                        <option value="">Selecciona receta...</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Cantidad de Panes Obtenidos</label>
+                                    <input type="number" class="form-control" id="prod-cantidad" min="1" required>
+                                    <div class="form-text" id="prod-estimado-costo">Costo estimado: $0</div>
+                                </div>
+                                <button type="submit" class="btn btn-crust w-100 fw-bold">Confirmar Producción y Descontar Stock</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-7">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-white fw-bold">Stock de Producto Terminado (Listo para Venta)</div>
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Producto</th>
+                                        <th>Stock Actual</th>
+                                        <th>Costo Unit. Actual</th>
+                                        <th>Precio Sugerido</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabla-stock-terminado"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. RECETAS Y COSTOS -->
+        <div class="tab-pane fade" id="pills-recetas">
+            <div class="row g-4">
+                <div class="col-md-5">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-dark text-white fw-bold">Crear / Actualizar Receta</div>
+                        <div class="card-body">
+                            <form id="form-receta">
+                                <div class="mb-2">
+                                    <label class="form-label">Nombre del Producto</label>
+                                    <input type="text" class="form-control" id="receta-nombre" placeholder="Ej: Pan Completo Estándar" required>
+                                </div>
+                                <div class="row g-2 mb-3">
+                                    <div class="col-6">
+                                        <label class="form-label">Rendimiento (Panes)</label>
+                                        <input type="number" class="form-control" id="receta-rendimiento" placeholder="Ej: 12" min="1" required>
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="form-label">Precio Venta ($)</label>
+                                        <input type="number" class="form-control" id="receta-precio-venta" placeholder="Ej: 350" min="1" required>
+                                    </div>
+                                </div>
+                                
+                                <label class="form-label fw-bold">Ingredientes de la Receta:</label>
+                                <div id="lista-ingredientes-form" class="mb-2"></div>
+                                <button type="button" class="btn btn-sm btn-outline-secondary mb-3" id="btn-agregar-ingrediente">
+                                    + Agregar Ingrediente
+                                </button>
+
+                                <button type="submit" class="btn btn-crust w-100 fw-bold">Guardar Receta</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-7">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-white fw-bold">Recetario Valorizado (Costo en Tiempo Real)</div>
+                        <div class="card-body" id="contenedor-recetas">
+                            <p class="text-muted">No hay recetas registradas aún.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. INVENTARIO DE INSUMOS -->
+        <div class="tab-pane fade" id="pills-inventario">
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-primary text-white fw-bold">Ingresar / Comprar Insumo</div>
+                        <div class="card-body">
+                            <form id="form-insumo">
+                                <div class="mb-2">
+                                    <label class="form-label">Insumo Existente o Nuevo</label>
+                                    <input type="text" class="form-control" id="insumo-nombre" list="datalist-insumos" placeholder="Ej: Harina Panadera" required>
+                                    <datalist id="datalist-insumos"></datalist>
+                                </div>
+                                <div class="row g-2 mb-2">
+                                    <div class="col-7">
+                                        <label class="form-label">Cantidad Comprada</label>
+                                        <input type="number" step="any" class="form-control" id="insumo-cantidad" placeholder="Ej: 25000" required>
+                                    </div>
+                                    <div class="col-5">
+                                        <label class="form-label">Unidad</label>
+                                        <select class="form-select" id="insumo-unidad">
+                                            <option value="g">Gramos (g)</option>
+                                            <option value="cc">Mililitros (cc)</option>
+                                            <option value="unid">Unidades</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Costo Total Compra ($)</label>
+                                    <input type="number" class="form-control" id="insumo-costo-total" placeholder="Ej: 18500" required>
+                                    <div class="form-text">Si el insumo ya existe, se sumará al stock y se actualizará su costo promedio.</div>
+                                </div>
+                                <button type="submit" class="btn btn-primary w-100 fw-bold">Agregar al Inventario</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-8">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-white fw-bold">Stock Actual de Materias Primas</div>
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Insumo</th>
+                                        <th>Stock Disponible</th>
+                                        <th>Costo Unitario</th>
+                                        <th>Valor en Stock</th>
+                                        <th>Acción</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabla-insumos"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Firebase SDK v10 (Modular) -->
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, set, push, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+    // Configuración Firebase - Proyecto Pancito
+    const firebaseConfig = {
+        apiKey: "AIzaSyC1hOsQNIPV2MkDMdqqHLp52Gw_5i3c7S0",
+        authDomain: "pancito-c13d7.firebaseapp.com",
+        databaseURL: "https://pancito-c13d7-default-rtdb.firebaseio.com",
+        projectId: "pancito-c13d7",
+        storageBucket: "pancito-c13d7.firebasestorage.app",
+        messagingSenderId: "196850410261",
+        appId: "1:196850410261:web:e7edae03c1731226afff1c",
+        measurementId: "G-TCKE9R333Q"
+    };
+
+    // Inicializar Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    // Estado Global en Memoria
+    let state = {
+        insumos: {},
+        recetas: {},
+        movimientos: {}
+    };
+
+    // Formato Moneda Chilena (CLP)
+    const formatCLP = (num) => {
+        return '$' + Math.round(num || 0).toLocaleString('es-CL');
+    };
+
+    // Escuchar cambios en tiempo real desde Firebase
+    onValue(ref(db, '/'), (snapshot) => {
+        const data = snapshot.val() || {};
+        state.insumos = data.insumos || {};
+        state.recetas = data.recetas || {};
+        state.movimientos = data.movimientos || {};
+
+        document.getElementById('connection-status').innerHTML = '<i class="bi bi-circle-fill text-success"></i> En línea';
+        renderAll();
+    }, (error) => {
+        document.getElementById('connection-status').innerHTML = '<i class="bi bi-circle-fill text-danger"></i> Error Firebase';
+        console.error(error);
+    });
+
+    // =========================================================================
+    // CÁLCULOS DE COSTOS Y VALORIZACIÓN
+    // =========================================================================
+    function calcularCostoReceta(receta) {
+        if (!receta || !receta.ingredientes) return { totalTanda: 0, porUnidad: 0 };
+        let costoTanda = 0;
+
+        receta.ingredientes.forEach(ing => {
+            const insumo = state.insumos[ing.insumoId];
+            if (insumo && insumo.costoUnitario) {
+                costoTanda += ing.cantidad * insumo.costoUnitario;
+            }
+        });
+
+        const porUnidad = receta.rendimiento > 0 ? (costoTanda / receta.rendimiento) : 0;
+        return { totalTanda: costoTanda, porUnidad: porUnidad };
+    }
+
+    // =========================================================================
+    // RENDERIZADO DE INTERFAZ Y KPIs
+    // =========================================================================
+    function renderAll() {
+        renderInsumos();
+        renderRecetas();
+        renderProduccionYStock();
+        renderMovimientosYKPIs();
+    }
+
+    function renderInsumos() {
+        const tbody = document.getElementById('tabla-insumos');
+        const datalist = document.getElementById('datalist-insumos');
+        tbody.innerHTML = '';
+        datalist.innerHTML = '';
+        let valorInventarioTotal = 0;
+
+        Object.entries(state.insumos).forEach(([id, item]) => {
+            const valorStock = item.stock * item.costoUnitario;
+            valorInventarioTotal += valorStock;
+
+            // Datalist para autocompletar compras
+            const opt = document.createElement('option');
+            opt.value = item.nombre;
+            datalist.appendChild(opt);
+
+            const badgeColor = item.stock <= 500 && item.unidad !== 'unid' ? 'bg-danger' : 'bg-secondary';
+
+            tbody.innerHTML += `
+                <tr>
+                    <td class="fw-bold">${item.nombre}</td>
+                    <td><span class="badge ${badgeColor}">${item.stock.toLocaleString('es-CL')} ${item.unidad}</span></td>
+                    <td>$${item.costoUnitario.toFixed(2)} / ${item.unidad}</td>
+                    <td class="fw-bold">${formatCLP(valorStock)}</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-danger" onclick="eliminarInsumo('${id}')">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+
+        document.getElementById('kpi-inventario').textContent = formatCLP(valorInventarioTotal);
+    }
+
+    function renderRecetas() {
+        const contenedor = document.getElementById('contenedor-recetas');
+        const selectProd = document.getElementById('prod-receta');
+        contenedor.innerHTML = '';
+        selectProd.innerHTML = '<option value="">Selecciona receta...</option>';
+
+        const entradas = Object.entries(state.recetas);
+        if (entradas.length === 0) {
+            contenedor.innerHTML = '<p class="text-muted mb-0">No hay recetas creadas. Crea una a la izquierda.</p>';
+            return;
+        }
+
+        entradas.forEach(([id, rec]) => {
+            const costos = calcularCostoReceta(rec);
+            const margenUnit = rec.precioVenta - costos.porUnidad;
+            const margenPorc = rec.precioVenta > 0 ? ((margenUnit / rec.precioVenta) * 100).toFixed(1) : 0;
+
+            // Llenar select de producción
+            selectProd.innerHTML += `<option value="${id}">${rec.nombre} (Costo unit: ${formatCLP(costos.porUnidad)})</option>`;
+
+            let listaIngHtml = '<ul class="list-unstyled small mb-2">';
+            (rec.ingredientes || []).forEach(ing => {
+                const ins = state.insumos[ing.insumoId];
+                const nombreIns = ins ? ins.nombre : 'Insumo eliminado';
+                const unidadIns = ins ? ins.unidad : '';
+                listaIngHtml += `<li>• ${ing.cantidad} ${unidadIns} de <strong>${nombreIns}</strong></li>`;
+            });
+            listaIngHtml += '</ul>';
+
+            contenedor.innerHTML += `
+                <div class="border rounded p-3 mb-3 bg-light">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h5 class="fw-bold mb-1">${rec.nombre} <span class="badge bg-dark">Rinde ${rec.rendimiento} unid.</span></h5>
+                            <p class="small text-muted mb-2">
+                                Costo Tanda: <strong>${formatCLP(costos.totalTanda)}</strong> | 
+                                Costo Unitario: <strong class="text-danger">${formatCLP(costos.porUnidad)}</strong> | 
+                                Precio Venta: <strong class="text-success">${formatCLP(rec.precioVenta)}</strong> 
+                                (Margen: ${margenPorc}%)
+                            </p>
+                        </div>
+                        <button class="btn btn-sm btn-outline-danger" onclick="eliminarReceta('${id}')"><i class="bi bi-trash"></i></button>
+                    </div>
+                    ${listaIngHtml}
+                </div>
+            `;
+        });
+    }
+
+    function renderProduccionYStock() {
+        const tbodyStock = document.getElementById('tabla-stock-terminado');
+        const selectVenta = document.getElementById('venta-producto');
+        tbodyStock.innerHTML = '';
+        selectVenta.innerHTML = '<option value="">Selecciona un producto...</option>';
+
+        Object.entries(state.recetas).forEach(([id, rec]) => {
+            const costos = calcularCostoReceta(rec);
+            const stockActual = rec.stockTerminado || 0;
+
+            tbodyStock.innerHTML += `
+                <tr>
+                    <td class="fw-bold">${rec.nombre}</td>
+                    <td><span class="badge ${stockActual > 0 ? 'bg-success' : 'bg-secondary'} fs-6">${stockActual} unid.</span></td>
+                    <td>${formatCLP(costos.porUnidad)}</td>
+                    <td>${formatCLP(rec.precioVenta)}</td>
+                </tr>
+            `;
+
+            if (stockActual > 0) {
+                selectVenta.innerHTML += `<option value="${id}" data-precio="${rec.precioVenta}" data-stock="${stockActual}">${rec.nombre} (Disp: ${stockActual} unid.)</option>`;
+            }
+        });
+    }
+
+    function renderMovimientosYKPIs() {
+        const tbody = document.getElementById('tabla-movimientos');
+        tbody.innerHTML = '';
+
+        let totalVentas = 0;
+        let totalUnidades = 0;
+        let totalEgresos = 0; // Costo de productos vendidos + gastos operativos
+
+        const lista = Object.entries(state.movimientos).reverse();
+
+        lista.forEach(([id, mov]) => {
+            const fecha = new Date(mov.fecha).toLocaleDateString('es-CL', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+            
+            if (mov.tipo === 'venta') {
+                totalVentas += mov.montoTotal;
+                totalUnidades += mov.cantidad;
+                totalEgresos += (mov.costoProduccionTotal || 0);
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td class="small">${fecha}</td>
+                        <td><span class="badge bg-success">Venta</span></td>
+                        <td>${mov.detalle} ${mov.cliente ? `<small class="text-muted">(${mov.cliente})</small>` : ''}</td>
+                        <td>${mov.cantidad} unid.</td>
+                        <td class="text-muted">${formatCLP(mov.costoProduccionTotal)}</td>
+                        <td class="fw-bold text-success">+${formatCLP(mov.montoTotal)}</td>
+                    </tr>
+                `;
+            } else if (mov.tipo === 'gasto') {
+                totalEgresos += mov.montoTotal;
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td class="small">${fecha}</td>
+                        <td><span class="badge bg-danger">Gasto</span></td>
+                        <td>${mov.detalle} <small class="text-muted">[${mov.categoria}]</small></td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td class="fw-bold text-danger">-${formatCLP(mov.montoTotal)}</td>
+                    </tr>
+                `;
+            }
+        });
+
+        const utilidadNeta = totalVentas - totalEgresos;
+        const margen = totalVentas > 0 ? ((utilidadNeta / totalVentas) * 100).toFixed(1) : 0;
+
+        document.getElementById('kpi-ventas').textContent = formatCLP(totalVentas);
+        document.getElementById('kpi-unidades').textContent = `${totalUnidades} unid. vendidas`;
+        document.getElementById('kpi-egresos').textContent = formatCLP(totalEgresos);
+        document.getElementById('kpi-utilidad').textContent = formatCLP(utilidadNeta);
+        document.getElementById('kpi-margen').textContent = `Margen real: ${margen}%`;
+    }
+
+    // =========================================================================
+    // FORMULARIOS Y ACCIONES
+    // =========================================================================
+
+    // 1. Agregar / Comprar Insumo (Calcula Costo Promedio Ponderado)
+    document.getElementById('form-insumo').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const nombre = document.getElementById('insumo-nombre').value.trim();
+        const cantidad = parseFloat(document.getElementById('insumo-cantidad').value);
+        const unidad = document.getElementById('insumo-unidad').value;
+        const costoTotal = parseFloat(document.getElementById('insumo-costo-total').value);
+
+        // Buscar si ya existe por nombre
+        let existenteId = null;
+        Object.entries(state.insumos).forEach(([id, item]) => {
+            if (item.nombre.toLowerCase() === nombre.toLowerCase()) {
+                existenteId = id;
+            }
+        });
+
+        if (existenteId) {
+            const actual = state.insumos[existenteId];
+            const valorActual = actual.stock * actual.costoUnitario;
+            const nuevoStock = actual.stock + cantidad;
+            const nuevoCostoUnitario = (valorActual + costoTotal) / nuevoStock;
+
+            await update(ref(db, `insumos/${existenteId}`), {
+                stock: nuevoStock,
+                costoUnitario: nuevoCostoUnitario
+            });
+        } else {
+            const nuevoRef = push(ref(db, 'insumos'));
+            await set(nuevoRef, {
+                nombre,
+                stock: cantidad,
+                unidad,
+                costoUnitario: costoTotal / cantidad
+            });
+        }
+
+        e.target.reset();
+    });
+
+    // 2. Filas dinámicas de ingredientes en Recetas
+    document.getElementById('btn-agregar-ingrediente').addEventListener('click', () => {
+        const contenedor = document.getElementById('lista-ingredientes-form');
+        const opciones = Object.entries(state.insumos).map(([id, ins]) => 
+            `<option value="${id}">${ins.nombre} (${ins.unidad})</option>`
+        ).join('');
+
+        if (!opciones) {
+            alert('Primero debes ingresar insumos en la pestaña "Stock Insumos".');
+            return;
+        }
+
+        const row = document.createElement('div');
+        row.className = 'row g-1 mb-2 ing-row';
+        row.innerHTML = `
+            <div class="col-7">
+                <select class="form-select form-select-sm ing-id" required>${opciones}</select>
+            </div>
+            <div class="col-4">
+                <input type="number" step="any" class="form-control form-control-sm ing-cant" placeholder="Cant." required>
+            </div>
+            <div class="col-1">
+                <button type="button" class="btn btn-sm btn-outline-danger w-100" onclick="this.closest('.ing-row').remove()">×</button>
+            </div>
+        `;
+        contenedor.appendChild(row);
+    });
+
+    // Guardar Receta
+    document.getElementById('form-receta').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const nombre = document.getElementById('receta-nombre').value.trim();
+        const rendimiento = parseFloat(document.getElementById('receta-rendimiento').value);
+        const precioVenta = parseFloat(document.getElementById('receta-precio-venta').value);
+
+        const ingredientes = [];
+        document.querySelectorAll('.ing-row').forEach(row => {
+            ingredientes.push({
+                insumoId: row.querySelector('.ing-id').value,
+                cantidad: parseFloat(row.querySelector('.ing-cant').value)
+            });
+        });
+
+        if (ingredientes.length === 0) {
+            alert('Agrega al menos un ingrediente a la receta.');
+            return;
+        }
+
+        const nuevaRecetaRef = push(ref(db, 'recetas'));
+        await set(nuevaRecetaRef, {
+            nombre,
+            rendimiento,
+            precioVenta,
+            ingredientes,
+            stockTerminado: 0
+        });
+
+        document.getElementById('lista-ingredientes-form').innerHTML = '';
+        e.target.reset();
+    });
+
+    // 3. Producción (Descuenta insumos proporcionalmente y suma producto terminado)
+    const prodRecetaSelect = document.getElementById('prod-receta');
+    const prodCantInput = document.getElementById('prod-cantidad');
+
+    function actualizarEstimadoProduccion() {
+        const recId = prodRecetaSelect.value;
+        const cant = parseFloat(prodCantInput.value) || 0;
+        if (recId && state.recetas[recId]) {
+            const costos = calcularCostoReceta(state.recetas[recId]);
+            document.getElementById('prod-estimado-costo').textContent = `Costo total de esta horneada: ${formatCLP(costos.porUnidad * cant)}`;
+        } else {
+            document.getElementById('prod-estimado-costo').textContent = 'Costo estimado: $0';
+        }
+    }
+    prodRecetaSelect.addEventListener('change', actualizarEstimadoProduccion);
+    prodCantInput.addEventListener('input', actualizarEstimadoProduccion);
+
+    document.getElementById('form-produccion').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const recetaId = prodRecetaSelect.value;
+        const cantidadProducida = parseFloat(prodCantInput.value);
+        const receta = state.recetas[recetaId];
+
+        if (!receta) return;
+
+        // Factor multiplicador (Ej: si la receta rinde 12 y produje 24, factor = 2)
+        const factor = cantidadProducida / receta.rendimiento;
+
+        // Validar stock suficiente
+        for (const ing of receta.ingredientes) {
+            const insumo = state.insumos[ing.insumoId];
+            const necesario = ing.cantidad * factor;
+            if (!insumo || insumo.stock < necesario) {
+                alert(`Stock insuficiente de "${insumo ? insumo.nombre : 'Insumo'}". Necesitas ${necesario.toFixed(1)} ${insumo?.unidad || ''}.`);
+                return;
+            }
+        }
+
+        // Descontar insumos en Firebase
+        const updates = {};
+        receta.ingredientes.forEach(ing => {
+            const insumo = state.insumos[ing.insumoId];
+            const nuevoStock = insumo.stock - (ing.cantidad * factor);
+            updates[`insumos/${ing.insumoId}/stock`] = Math.max(0, nuevoStock);
+        });
+
+        // Aumentar stock terminado
+        const stockActual = receta.stockTerminado || 0;
+        updates[`recetas/${recetaId}/stockTerminado`] = stockActual + cantidadProducida;
+
+        await update(ref(db), updates);
+        alert(`¡Producción registrada! Se sumaron ${cantidadProducida} unidades de ${receta.nombre} y se descontaron los insumos.`);
+        e.target.reset();
+        actualizarEstimadoProduccion();
+    });
+
+    // 4. Registrar Venta
+    document.getElementById('venta-producto').addEventListener('change', (e) => {
+        const opt = e.target.selectedOptions[0];
+        if (opt && opt.dataset.precio) {
+            document.getElementById('venta-precio').value = opt.dataset.precio;
+            document.getElementById('venta-cantidad').max = opt.dataset.stock;
+        }
+    });
+
+    document.getElementById('form-venta').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const recetaId = document.getElementById('venta-producto').value;
+        const cantidad = parseFloat(document.getElementById('venta-cantidad').value);
+        const precioUnit = parseFloat(document.getElementById('venta-precio').value);
+        const cliente = document.getElementById('venta-cliente').value.trim();
+
+        const receta = state.recetas[recetaId];
+        if (!receta || (receta.stockTerminado || 0) < cantidad) {
+            alert('No hay suficiente stock terminado para realizar esta venta.');
+            return;
+        }
+
+        const costos = calcularCostoReceta(receta);
+        const montoTotal = cantidad * precioUnit;
+        const costoProduccionTotal = cantidad * costos.porUnidad;
+
+        // Descontar stock terminado
+        await update(ref(db, `recetas/${recetaId}`), {
+            stockTerminado: receta.stockTerminado - cantidad
+        });
+
+        // Guardar movimiento
+        await set(push(ref(db, 'movimientos')), {
+            tipo: 'venta',
+            fecha: Date.now(),
+            detalle: receta.nombre,
+            cantidad,
+            precioUnit,
+            montoTotal,
+            costoProduccionTotal,
+            cliente
+        });
+
+        e.target.reset();
+    });
+
+    // 5. Registrar Gasto Operativo
+    document.getElementById('form-gasto').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const detalle = document.getElementById('gasto-desc').value.trim();
+        const categoria = document.getElementById('gasto-cat').value;
+        const montoTotal = parseFloat(document.getElementById('gasto-monto').value);
+
+        await set(push(ref(db, 'movimientos')), {
+            tipo: 'gasto',
+            fecha: Date.now(),
+            detalle,
+            categoria,
+            montoTotal
+        });
+
+        e.target.reset();
+    });
+
+    // Funciones globales para eliminar
+    window.eliminarInsumo = async (id) => {
+        if (confirm('¿Eliminar este insumo del inventario?')) {
+            await remove(ref(db, `insumos/${id}`));
+        }
+    };
+    window.eliminarReceta = async (id) => {
+        if (confirm('¿Eliminar esta receta?')) {
+            await remove(ref(db, `recetas/${id}`));
+        }
+    };
+</script>
+</body>
+</html>
