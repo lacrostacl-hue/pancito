@@ -4,14 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>La Crosta.cl | Administración y Producción</title>
-    <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <style>
         :root {
             --primary-crust: #8B4513;
-            --secondary-dough: #F5E6D3;
             --accent-gold: #D97706;
         }
         body {
@@ -54,18 +51,24 @@
 <body>
 
 <!-- Navbar -->
-<nav class="navbar navbar-dark mb-4 shadow-sm">
+<nav class="navbar navbar-dark mb-3 shadow-sm">
     <div class="container">
         <a class="navbar-brand fw-bold d-flex align-items-center" href="#">
             <i class="bi bi-shop me-2 fs-4"></i> La Crosta.cl <span class="badge bg-warning text-dark ms-2 fs-6">Gestión</span>
         </a>
-        <span class="text-white-50 small" id="connection-status">
+        <span class="text-white small" id="connection-status">
             <i class="bi bi-circle-fill text-warning"></i> Conectando...
         </span>
     </div>
 </nav>
 
 <div class="container pb-5">
+    <!-- Alerta de feedback -->
+    <div id="alert-box" class="alert d-none alert-dismissible fade show" role="alert">
+        <span id="alert-msg"></span>
+        <button type="button" class="btn-close" onclick="cerrarAlerta()"></button>
+    </div>
+
     <!-- KPIs Resumen Financiero -->
     <div class="row g-3 mb-4">
         <div class="col-6 col-md-3">
@@ -82,7 +85,7 @@
                 <div class="card-body">
                     <h6 class="text-muted small text-uppercase">Costos + Gastos</h6>
                     <h3 class="fw-bold text-danger mb-0" id="kpi-egresos">$0</h3>
-                    <small class="text-muted">Insumos y operativos</small>
+                    <small class="text-muted" id="kpi-km-resumen">0 km recorridos</small>
                 </div>
             </div>
         </div>
@@ -120,7 +123,7 @@
         </li>
         <li class="nav-item" role="presentation">
             <button class="nav-link" id="tab-recetas" data-bs-toggle="pill" data-bs-target="#pills-recetas" type="button">
-                <i class="bi bi-journal-text me-1"></i> Recetas y Costos
+                <i class="bi bi-journal-text me-1"></i> Recetas y Gas
             </button>
         </li>
         <li class="nav-item" role="presentation">
@@ -130,17 +133,16 @@
         </li>
     </ul>
 
-    <!-- Contenido de Pestañas -->
     <div class="tab-content" id="pills-tabContent">
-        
+
         <!-- 1. VENTAS Y GASTOS -->
         <div class="tab-pane fade show active" id="pills-operaciones">
             <div class="row g-4">
-                <!-- Registrar Venta -->
+                <!-- Registrar Venta + Transporte por KM -->
                 <div class="col-md-6">
                     <div class="card shadow-sm border-0">
                         <div class="card-header bg-success text-white fw-bold">
-                            <i class="bi bi-plus-circle me-1"></i> Registrar Venta de Pan
+                            <i class="bi bi-plus-circle me-1"></i> Registrar Venta y Transporte
                         </div>
                         <div class="card-body">
                             <form id="form-venta">
@@ -160,9 +162,16 @@
                                         <input type="number" class="form-control" id="venta-precio" min="1" required>
                                     </div>
                                 </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Cliente / Carro (Opcional)</label>
-                                    <input type="text" class="form-control" id="venta-cliente" placeholder="Ej: Carro Plaza Melipilla">
+                                <div class="row g-2 mb-3">
+                                    <div class="col-6">
+                                        <label class="form-label">Cliente / Carro</label>
+                                        <input type="text" class="form-control" id="venta-cliente" placeholder="Ej: Carro San Pedro">
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="form-label">KM Viaje (16 km/L @ $1.500)</label>
+                                        <input type="number" step="any" min="0" class="form-control" id="venta-km" value="0">
+                                        <div class="form-text" id="venta-costo-km">Costo viaje: $0</div>
+                                    </div>
                                 </div>
                                 <button type="submit" class="btn btn-success w-100 fw-bold">Guardar Venta</button>
                             </form>
@@ -180,15 +189,15 @@
                             <form id="form-gasto">
                                 <div class="mb-3">
                                     <label class="form-label">Descripción del Gasto</label>
-                                    <input type="text" class="form-control" id="gasto-desc" placeholder="Ej: Balón de Gas 15kg, Bencina reparto..." required>
+                                    <input type="text" class="form-control" id="gasto-desc" placeholder="Ej: Bolsas selladas, electricidad..." required>
                                 </div>
                                 <div class="row g-2 mb-3">
                                     <div class="col-6">
                                         <label class="form-label">Categoría</label>
                                         <select class="form-select" id="gasto-cat">
-                                            <option value="Energía/Gas">Energía / Gas</option>
-                                            <option value="Transporte">Transporte / Bencina</option>
-                                            <option value="Empaque">Empaque / Etiquetas</option>
+                                            <option value="Transporte">Transporte / Petróleo</option>
+                                            <option value="Gas">Gas / Horno</option>
+                                            <option value="Empaque">Empaque / Bolsas</option>
                                             <option value="Otros">Otros Gastos</option>
                                         </select>
                                     </div>
@@ -203,7 +212,7 @@
                     </div>
                 </div>
 
-                <!-- Historial de Movimientos -->
+                <!-- Historial -->
                 <div class="col-12">
                     <div class="card shadow-sm border-0">
                         <div class="card-header bg-white fw-bold">Historial de Ventas y Gastos</div>
@@ -215,7 +224,7 @@
                                         <th>Tipo</th>
                                         <th>Detalle</th>
                                         <th>Unidades</th>
-                                        <th>Costo Prod.</th>
+                                        <th>Costo Prod. + Viaje</th>
                                         <th>Monto Total</th>
                                     </tr>
                                 </thead>
@@ -236,7 +245,9 @@
                             <i class="bi bi-fire me-1"></i> Registrar Tanda de Producción
                         </div>
                         <div class="card-body">
-                            <p class="small text-muted">Al producir, el sistema descontará automáticamente los gramos/unidades de tus insumos según la receta y cargará los panes al stock de venta.</p>
+                            <p class="small text-muted">
+                                Base: <strong>25 min</strong> de horno por tanda. Si es pan de completo y supera los <strong>60 panes</strong>, suma <strong>+15 min</strong> (40 min total). Gas: 25 kg = $25.000 ($1/g).
+                            </p>
                             <form id="form-produccion">
                                 <div class="mb-3">
                                     <label class="form-label">Receta a Producir</label>
@@ -247,7 +258,7 @@
                                 <div class="mb-3">
                                     <label class="form-label">Cantidad de Panes Obtenidos</label>
                                     <input type="number" class="form-control" id="prod-cantidad" min="1" required>
-                                    <div class="form-text" id="prod-estimado-costo">Costo estimado: $0</div>
+                                    <div class="form-text" id="prod-detalle-horno">Minutos horno: 25 min | Gas: $0 | Costo tanda: $0</div>
                                 </div>
                                 <button type="submit" class="btn btn-crust w-100 fw-bold">Confirmar Producción y Descontar Stock</button>
                             </form>
@@ -257,15 +268,15 @@
 
                 <div class="col-md-7">
                     <div class="card shadow-sm border-0">
-                        <div class="card-header bg-white fw-bold">Stock de Producto Terminado (Listo para Venta)</div>
+                        <div class="card-header bg-white fw-bold">Stock de Producto Terminado</div>
                         <div class="table-responsive">
                             <table class="table table-hover align-middle mb-0">
                                 <thead class="table-light">
                                     <tr>
                                         <th>Producto</th>
                                         <th>Stock Actual</th>
-                                        <th>Costo Unit. Actual</th>
-                                        <th>Precio Sugerido</th>
+                                        <th>Costo Unit. (Insumos + Gas)</th>
+                                        <th>Precio Venta</th>
                                     </tr>
                                 </thead>
                                 <tbody id="tabla-stock-terminado"></tbody>
@@ -276,29 +287,44 @@
             </div>
         </div>
 
-        <!-- 3. RECETAS Y COSTOS -->
+        <!-- 3. RECETAS Y GAS -->
         <div class="tab-pane fade" id="pills-recetas">
             <div class="row g-4">
                 <div class="col-md-5">
                     <div class="card shadow-sm border-0">
-                        <div class="card-header bg-dark text-white fw-bold">Crear / Actualizar Receta</div>
+                        <div class="card-header bg-dark text-white fw-bold">Crear Receta</div>
                         <div class="card-body">
                             <form id="form-receta">
                                 <div class="mb-2">
                                     <label class="form-label">Nombre del Producto</label>
-                                    <input type="text" class="form-control" id="receta-nombre" placeholder="Ej: Pan Completo Estándar" required>
+                                    <input type="text" class="form-control" id="receta-nombre" placeholder="Ej: Pan de Completo" required>
                                 </div>
-                                <div class="row g-2 mb-3">
+                                <div class="row g-2 mb-2">
                                     <div class="col-6">
-                                        <label class="form-label">Rendimiento (Panes)</label>
-                                        <input type="number" class="form-control" id="receta-rendimiento" placeholder="Ej: 12" min="1" required>
+                                        <label class="form-label">Rendimiento Tanda (Panes)</label>
+                                        <input type="number" class="form-control" id="receta-rendimiento" value="60" min="1" required>
                                     </div>
                                     <div class="col-6">
                                         <label class="form-label">Precio Venta ($)</label>
                                         <input type="number" class="form-control" id="receta-precio-venta" placeholder="Ej: 350" min="1" required>
                                     </div>
                                 </div>
-                                
+                                <div class="row g-2 mb-3">
+                                    <div class="col-6">
+                                        <label class="form-label">Consumo Gas Horno (g/min)</label>
+                                        <input type="number" step="any" class="form-control" id="receta-gas-gmin" value="15" min="0" required>
+                                        <div class="form-text">25 kg = $25.000 ($1/g)</div>
+                                    </div>
+                                    <div class="col-6 d-flex align-items-center">
+                                        <div class="form-check mt-3">
+                                            <input class="form-check-input" type="checkbox" id="receta-es-completo" checked>
+                                            <label class="form-check-label small" for="receta-es-completo">
+                                                Aplica +15 min si &gt;60 panes
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <label class="form-label fw-bold">Ingredientes de la Receta:</label>
                                 <div id="lista-ingredientes-form" class="mb-2"></div>
                                 <button type="button" class="btn btn-sm btn-outline-secondary mb-3" id="btn-agregar-ingrediente">
@@ -313,7 +339,7 @@
 
                 <div class="col-md-7">
                     <div class="card shadow-sm border-0">
-                        <div class="card-header bg-white fw-bold">Recetario Valorizado (Costo en Tiempo Real)</div>
+                        <div class="card-header bg-white fw-bold">Recetario Valorizado (Insumos + Gas)</div>
                         <div class="card-body" id="contenedor-recetas">
                             <p class="text-muted">No hay recetas registradas aún.</p>
                         </div>
@@ -332,13 +358,13 @@
                             <form id="form-insumo">
                                 <div class="mb-2">
                                     <label class="form-label">Insumo Existente o Nuevo</label>
-                                    <input type="text" class="form-control" id="insumo-nombre" list="datalist-insumos" placeholder="Ej: Harina Panadera" required>
+                                    <input type="text" class="form-control" id="insumo-nombre" list="datalist-insumos" placeholder="Ej: Harina" required>
                                     <datalist id="datalist-insumos"></datalist>
                                 </div>
                                 <div class="row g-2 mb-2">
                                     <div class="col-7">
                                         <label class="form-label">Cantidad Comprada</label>
-                                        <input type="number" step="any" class="form-control" id="insumo-cantidad" placeholder="Ej: 25000" required>
+                                        <input type="number" step="any" class="form-control" id="insumo-cantidad" min="0.01" required>
                                     </div>
                                     <div class="col-5">
                                         <label class="form-label">Unidad</label>
@@ -351,8 +377,7 @@
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">Costo Total Compra ($)</label>
-                                    <input type="number" class="form-control" id="insumo-costo-total" placeholder="Ej: 18500" required>
-                                    <div class="form-text">Si el insumo ya existe, se sumará al stock y se actualizará su costo promedio.</div>
+                                    <input type="number" class="form-control" id="insumo-costo-total" min="1" required>
                                 </div>
                                 <button type="submit" class="btn btn-primary w-100 fw-bold">Agregar al Inventario</button>
                             </form>
@@ -385,15 +410,12 @@
     </div>
 </div>
 
-<!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-<!-- Firebase SDK v10 (Modular) -->
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getDatabase, ref, set, push, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-    // Configuración Firebase - Proyecto Pancito
     const firebaseConfig = {
         apiKey: "AIzaSyC1hOsQNIPV2MkDMdqqHLp52Gw_5i3c7S0",
         authDomain: "pancito-c13d7.firebaseapp.com",
@@ -405,23 +427,29 @@
         measurementId: "G-TCKE9R333Q"
     };
 
-    // Inicializar Firebase
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    // Estado Global en Memoria
+    // Constantes operativas
+    const PRECIO_GAS_POR_GRAMO = 25000 / 25000; // $25.000 por 25 kg = $1 por gramo
+    const COSTO_POR_KM = 1500 / 16; // 16 km/L a $1.500/L = $93,75 por km
+
     let state = {
         insumos: {},
         recetas: {},
         movimientos: {}
     };
 
-    // Formato Moneda Chilena (CLP)
-    const formatCLP = (num) => {
-        return '$' + Math.round(num || 0).toLocaleString('es-CL');
-    };
+    const formatCLP = (num) => '$' + Math.round(num || 0).toLocaleString('es-CL');
 
-    // Escuchar cambios en tiempo real desde Firebase
+    function mostrarAlerta(msg, tipo = 'success') {
+        const box = document.getElementById('alert-box');
+        box.className = `alert alert-${tipo} alert-dismissible fade show`;
+        document.getElementById('alert-msg').textContent = msg;
+        box.classList.remove('d-none');
+    }
+    window.cerrarAlerta = () => document.getElementById('alert-box').classList.add('d-none');
+
     onValue(ref(db, '/'), (snapshot) => {
         const data = snapshot.val() || {};
         state.insumos = data.insumos || {};
@@ -432,35 +460,46 @@
         renderAll();
     }, (error) => {
         document.getElementById('connection-status').innerHTML = '<i class="bi bi-circle-fill text-danger"></i> Error Firebase';
-        console.error(error);
+        mostrarAlerta('Error de conexión con Firebase: ' + error.message, 'danger');
     });
 
-    // =========================================================================
-    // CÁLCULOS DE COSTOS Y VALORIZACIÓN
-    // =========================================================================
-    function calcularCostoReceta(receta) {
-        if (!receta || !receta.ingredientes) return { totalTanda: 0, porUnidad: 0 };
-        let costoTanda = 0;
+    function calcularMinutosHorno(receta, cantidadPanes) {
+        let minutos = 25;
+        if (receta.esCompleto && cantidadPanes > 60) {
+            minutos += 15; // 40 min en total si supera 60 panes de completo
+        }
+        return minutos;
+    }
 
-        receta.ingredientes.forEach(ing => {
+    function calcularCostoProduccion(receta, cantidadPanes) {
+        if (!receta) return { insumos: 0, gas: 0, minutos: 25, total: 0, porUnidad: 0 };
+
+        const factor = receta.rendimiento > 0 ? (cantidadPanes / receta.rendimiento) : 0;
+        let costoInsumos = 0;
+
+        (receta.ingredientes || []).forEach(ing => {
             const insumo = state.insumos[ing.insumoId];
             if (insumo && insumo.costoUnitario) {
-                costoTanda += ing.cantidad * insumo.costoUnitario;
+                costoInsumos += ing.cantidad * factor * insumo.costoUnitario;
             }
         });
 
-        const porUnidad = receta.rendimiento > 0 ? (costoTanda / receta.rendimiento) : 0;
-        return { totalTanda: costoTanda, porUnidad: porUnidad };
+        const minutos = calcularMinutosHorno(receta, cantidadPanes);
+        const gasGramos = minutos * (parseFloat(receta.gasGMin) || 0);
+        const costoGas = gasGramos * PRECIO_GAS_POR_GRAMO;
+
+        const total = costoInsumos + costoGas;
+        const porUnidad = cantidadPanes > 0 ? (total / cantidadPanes) : 0;
+
+        return { insumos: costoInsumos, gas: costoGas, minutos, total, porUnidad };
     }
 
-    // =========================================================================
-    // RENDERIZADO DE INTERFAZ Y KPIs
-    // =========================================================================
     function renderAll() {
         renderInsumos();
         renderRecetas();
         renderProduccionYStock();
         renderMovimientosYKPIs();
+        actualizarEstimadoProduccion();
     }
 
     function renderInsumos() {
@@ -474,18 +513,15 @@
             const valorStock = item.stock * item.costoUnitario;
             valorInventarioTotal += valorStock;
 
-            // Datalist para autocompletar compras
             const opt = document.createElement('option');
             opt.value = item.nombre;
             datalist.appendChild(opt);
 
-            const badgeColor = item.stock <= 500 && item.unidad !== 'unid' ? 'bg-danger' : 'bg-secondary';
-
             tbody.innerHTML += `
                 <tr>
                     <td class="fw-bold">${item.nombre}</td>
-                    <td><span class="badge ${badgeColor}">${item.stock.toLocaleString('es-CL')} ${item.unidad}</span></td>
-                    <td>$${item.costoUnitario.toFixed(2)} / ${item.unidad}</td>
+                    <td><span class="badge bg-secondary">${Number(item.stock).toLocaleString('es-CL')} ${item.unidad}</span></td>
+                    <td>$${Number(item.costoUnitario).toFixed(2)} / ${item.unidad}</td>
                     <td class="fw-bold">${formatCLP(valorStock)}</td>
                     <td>
                         <button class="btn btn-sm btn-outline-danger" onclick="eliminarInsumo('${id}')">
@@ -502,29 +538,25 @@
     function renderRecetas() {
         const contenedor = document.getElementById('contenedor-recetas');
         const selectProd = document.getElementById('prod-receta');
+        const valorPrevioProd = selectProd.value;
+
         contenedor.innerHTML = '';
         selectProd.innerHTML = '<option value="">Selecciona receta...</option>';
 
         const entradas = Object.entries(state.recetas);
         if (entradas.length === 0) {
-            contenedor.innerHTML = '<p class="text-muted mb-0">No hay recetas creadas. Crea una a la izquierda.</p>';
+            contenedor.innerHTML = '<p class="text-muted mb-0">No hay recetas creadas.</p>';
             return;
         }
 
         entradas.forEach(([id, rec]) => {
-            const costos = calcularCostoReceta(rec);
-            const margenUnit = rec.precioVenta - costos.porUnidad;
-            const margenPorc = rec.precioVenta > 0 ? ((margenUnit / rec.precioVenta) * 100).toFixed(1) : 0;
-
-            // Llenar select de producción
-            selectProd.innerHTML += `<option value="${id}">${rec.nombre} (Costo unit: ${formatCLP(costos.porUnidad)})</option>`;
+            const base = calcularCostoProduccion(rec, rec.rendimiento || 60);
+            selectProd.innerHTML += `<option value="${id}">${rec.nombre} (Costo unit: ${formatCLP(base.porUnidad)})</option>`;
 
             let listaIngHtml = '<ul class="list-unstyled small mb-2">';
             (rec.ingredientes || []).forEach(ing => {
                 const ins = state.insumos[ing.insumoId];
-                const nombreIns = ins ? ins.nombre : 'Insumo eliminado';
-                const unidadIns = ins ? ins.unidad : '';
-                listaIngHtml += `<li>• ${ing.cantidad} ${unidadIns} de <strong>${nombreIns}</strong></li>`;
+                listaIngHtml += `<li>• ${ing.cantidad} ${ins ? ins.unidad : ''} de <strong>${ins ? ins.nombre : 'Insumo'}</strong></li>`;
             });
             listaIngHtml += '</ul>';
 
@@ -532,12 +564,16 @@
                 <div class="border rounded p-3 mb-3 bg-light">
                     <div class="d-flex justify-content-between align-items-start">
                         <div>
-                            <h5 class="fw-bold mb-1">${rec.nombre} <span class="badge bg-dark">Rinde ${rec.rendimiento} unid.</span></h5>
+                            <h5 class="fw-bold mb-1">
+                                ${rec.nombre}
+                                <span class="badge bg-dark">Tanda: ${rec.rendimiento} unid.</span>
+                                ${rec.esCompleto ? '<span class="badge bg-warning text-dark">+15m &gt;60 completo</span>' : ''}
+                            </h5>
                             <p class="small text-muted mb-2">
-                                Costo Tanda: <strong>${formatCLP(costos.totalTanda)}</strong> | 
-                                Costo Unitario: <strong class="text-danger">${formatCLP(costos.porUnidad)}</strong> | 
-                                Precio Venta: <strong class="text-success">${formatCLP(rec.precioVenta)}</strong> 
-                                (Margen: ${margenPorc}%)
+                                Insumos tanda: <strong>${formatCLP(base.insumos)}</strong> |
+                                Gas (${base.minutos}m @ ${rec.gasGMin || 0}g/m): <strong>${formatCLP(base.gas)}</strong> |
+                                Costo Unit.: <strong class="text-danger">${formatCLP(base.porUnidad)}</strong> |
+                                Venta: <strong class="text-success">${formatCLP(rec.precioVenta)}</strong>
                             </p>
                         </div>
                         <button class="btn btn-sm btn-outline-danger" onclick="eliminarReceta('${id}')"><i class="bi bi-trash"></i></button>
@@ -546,6 +582,8 @@
                 </div>
             `;
         });
+
+        if (valorPrevioProd) selectProd.value = valorPrevioProd;
     }
 
     function renderProduccionYStock() {
@@ -555,14 +593,14 @@
         selectVenta.innerHTML = '<option value="">Selecciona un producto...</option>';
 
         Object.entries(state.recetas).forEach(([id, rec]) => {
-            const costos = calcularCostoReceta(rec);
+            const base = calcularCostoProduccion(rec, rec.rendimiento || 60);
             const stockActual = rec.stockTerminado || 0;
 
             tbodyStock.innerHTML += `
                 <tr>
                     <td class="fw-bold">${rec.nombre}</td>
                     <td><span class="badge ${stockActual > 0 ? 'bg-success' : 'bg-secondary'} fs-6">${stockActual} unid.</span></td>
-                    <td>${formatCLP(costos.porUnidad)}</td>
+                    <td>${formatCLP(base.porUnidad)}</td>
                     <td>${formatCLP(rec.precioVenta)}</td>
                 </tr>
             `;
@@ -579,31 +617,36 @@
 
         let totalVentas = 0;
         let totalUnidades = 0;
-        let totalEgresos = 0; // Costo de productos vendidos + gastos operativos
+        let totalEgresos = 0;
+        let totalKm = 0;
 
         const lista = Object.entries(state.movimientos).reverse();
 
         lista.forEach(([id, mov]) => {
             const fecha = new Date(mov.fecha).toLocaleDateString('es-CL', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
-            
+
             if (mov.tipo === 'venta') {
+                const costoProd = mov.costoProduccionTotal || 0;
+                const costoViaje = mov.costoViaje || 0;
+                const km = mov.kmViaje || 0;
+
                 totalVentas += mov.montoTotal;
                 totalUnidades += mov.cantidad;
-                totalEgresos += (mov.costoProduccionTotal || 0);
+                totalEgresos += costoProd + costoViaje;
+                totalKm += km;
 
                 tbody.innerHTML += `
                     <tr>
                         <td class="small">${fecha}</td>
                         <td><span class="badge bg-success">Venta</span></td>
-                        <td>${mov.detalle} ${mov.cliente ? `<small class="text-muted">(${mov.cliente})</small>` : ''}</td>
+                        <td>${mov.detalle} ${mov.cliente ? `<small class="text-muted">(${mov.cliente})</small>` : ''} ${km > 0 ? `<span class="badge bg-info text-dark">${km} km</span>` : ''}</td>
                         <td>${mov.cantidad} unid.</td>
-                        <td class="text-muted">${formatCLP(mov.costoProduccionTotal)}</td>
+                        <td class="text-muted">${formatCLP(costoProd + costoViaje)}</td>
                         <td class="fw-bold text-success">+${formatCLP(mov.montoTotal)}</td>
                     </tr>
                 `;
             } else if (mov.tipo === 'gasto') {
                 totalEgresos += mov.montoTotal;
-
                 tbody.innerHTML += `
                     <tr>
                         <td class="small">${fecha}</td>
@@ -623,126 +666,123 @@
         document.getElementById('kpi-ventas').textContent = formatCLP(totalVentas);
         document.getElementById('kpi-unidades').textContent = `${totalUnidades} unid. vendidas`;
         document.getElementById('kpi-egresos').textContent = formatCLP(totalEgresos);
+        document.getElementById('kpi-km-resumen').textContent = `${totalKm} km recorridos`;
         document.getElementById('kpi-utilidad').textContent = formatCLP(utilidadNeta);
         document.getElementById('kpi-margen').textContent = `Margen real: ${margen}%`;
     }
 
-    // =========================================================================
-    // FORMULARIOS Y ACCIONES
-    // =========================================================================
-
-    // 1. Agregar / Comprar Insumo (Calcula Costo Promedio Ponderado)
+    // 1. Insumos
     document.getElementById('form-insumo').addEventListener('submit', async (e) => {
         e.preventDefault();
-        const nombre = document.getElementById('insumo-nombre').value.trim();
-        const cantidad = parseFloat(document.getElementById('insumo-cantidad').value);
-        const unidad = document.getElementById('insumo-unidad').value;
-        const costoTotal = parseFloat(document.getElementById('insumo-costo-total').value);
+        try {
+            const nombre = document.getElementById('insumo-nombre').value.trim();
+            const cantidad = parseFloat(document.getElementById('insumo-cantidad').value);
+            const unidad = document.getElementById('insumo-unidad').value;
+            const costoTotal = parseFloat(document.getElementById('insumo-costo-total').value);
 
-        // Buscar si ya existe por nombre
-        let existenteId = null;
-        Object.entries(state.insumos).forEach(([id, item]) => {
-            if (item.nombre.toLowerCase() === nombre.toLowerCase()) {
-                existenteId = id;
+            let existenteId = null;
+            Object.entries(state.insumos).forEach(([id, item]) => {
+                if (item.nombre.toLowerCase() === nombre.toLowerCase()) existenteId = id;
+            });
+
+            if (existenteId) {
+                const actual = state.insumos[existenteId];
+                const nuevoStock = actual.stock + cantidad;
+                const nuevoCostoUnitario = ((actual.stock * actual.costoUnitario) + costoTotal) / nuevoStock;
+                await update(ref(db, `insumos/${existenteId}`), { stock: nuevoStock, costoUnitario: nuevoCostoUnitario });
+            } else {
+                await set(push(ref(db, 'insumos')), {
+                    nombre,
+                    stock: cantidad,
+                    unidad,
+                    costoUnitario: costoTotal / cantidad
+                });
             }
-        });
 
-        if (existenteId) {
-            const actual = state.insumos[existenteId];
-            const valorActual = actual.stock * actual.costoUnitario;
-            const nuevoStock = actual.stock + cantidad;
-            const nuevoCostoUnitario = (valorActual + costoTotal) / nuevoStock;
-
-            await update(ref(db, `insumos/${existenteId}`), {
-                stock: nuevoStock,
-                costoUnitario: nuevoCostoUnitario
-            });
-        } else {
-            const nuevoRef = push(ref(db, 'insumos'));
-            await set(nuevoRef, {
-                nombre,
-                stock: cantidad,
-                unidad,
-                costoUnitario: costoTotal / cantidad
-            });
+            e.target.reset();
+            mostrarAlerta(`Insumo "${nombre}" guardado en inventario.`);
+        } catch (err) {
+            mostrarAlerta('No se pudo guardar el insumo: ' + err.message, 'danger');
         }
-
-        e.target.reset();
     });
 
-    // 2. Filas dinámicas de ingredientes en Recetas
+    // 2. Ingredientes en Receta
     document.getElementById('btn-agregar-ingrediente').addEventListener('click', () => {
-        const contenedor = document.getElementById('lista-ingredientes-form');
-        const opciones = Object.entries(state.insumos).map(([id, ins]) => 
+        const opciones = Object.entries(state.insumos).map(([id, ins]) =>
             `<option value="${id}">${ins.nombre} (${ins.unidad})</option>`
         ).join('');
 
         if (!opciones) {
-            alert('Primero debes ingresar insumos en la pestaña "Stock Insumos".');
+            mostrarAlerta('Primero agrega insumos en "Stock Insumos".', 'warning');
             return;
         }
 
         const row = document.createElement('div');
         row.className = 'row g-1 mb-2 ing-row';
         row.innerHTML = `
-            <div class="col-7">
-                <select class="form-select form-select-sm ing-id" required>${opciones}</select>
-            </div>
-            <div class="col-4">
-                <input type="number" step="any" class="form-control form-control-sm ing-cant" placeholder="Cant." required>
-            </div>
-            <div class="col-1">
-                <button type="button" class="btn btn-sm btn-outline-danger w-100" onclick="this.closest('.ing-row').remove()">×</button>
-            </div>
+            <div class="col-7"><select class="form-select form-select-sm ing-id" required>${opciones}</select></div>
+            <div class="col-4"><input type="number" step="any" class="form-control form-control-sm ing-cant" placeholder="Cant." required></div>
+            <div class="col-1"><button type="button" class="btn btn-sm btn-outline-danger w-100" onclick="this.closest('.ing-row').remove()">×</button></div>
         `;
-        contenedor.appendChild(row);
+        document.getElementById('lista-ingredientes-form').appendChild(row);
     });
 
-    // Guardar Receta
     document.getElementById('form-receta').addEventListener('submit', async (e) => {
         e.preventDefault();
-        const nombre = document.getElementById('receta-nombre').value.trim();
-        const rendimiento = parseFloat(document.getElementById('receta-rendimiento').value);
-        const precioVenta = parseFloat(document.getElementById('receta-precio-venta').value);
+        try {
+            const nombre = document.getElementById('receta-nombre').value.trim();
+            const rendimiento = parseFloat(document.getElementById('receta-rendimiento').value);
+            const precioVenta = parseFloat(document.getElementById('receta-precio-venta').value);
+            const gasGMin = parseFloat(document.getElementById('receta-gas-gmin').value) || 0;
+            const esCompleto = document.getElementById('receta-es-completo').checked;
 
-        const ingredientes = [];
-        document.querySelectorAll('.ing-row').forEach(row => {
-            ingredientes.push({
-                insumoId: row.querySelector('.ing-id').value,
-                cantidad: parseFloat(row.querySelector('.ing-cant').value)
+            const ingredientes = [];
+            document.querySelectorAll('.ing-row').forEach(row => {
+                ingredientes.push({
+                    insumoId: row.querySelector('.ing-id').value,
+                    cantidad: parseFloat(row.querySelector('.ing-cant').value)
+                });
             });
-        });
 
-        if (ingredientes.length === 0) {
-            alert('Agrega al menos un ingrediente a la receta.');
-            return;
+            if (ingredientes.length === 0) {
+                mostrarAlerta('Agrega al menos un ingrediente a la receta.', 'warning');
+                return;
+            }
+
+            await set(push(ref(db, 'recetas')), {
+                nombre,
+                rendimiento,
+                precioVenta,
+                gasGMin,
+                esCompleto,
+                ingredientes,
+                stockTerminado: 0
+            });
+
+            document.getElementById('lista-ingredientes-form').innerHTML = '';
+            e.target.reset();
+            document.getElementById('receta-rendimiento').value = 60;
+            document.getElementById('receta-gas-gmin').value = 15;
+            document.getElementById('receta-es-completo').checked = true;
+            mostrarAlerta(`Receta "${nombre}" guardada.`);
+        } catch (err) {
+            mostrarAlerta('Error al guardar receta: ' + err.message, 'danger');
         }
-
-        const nuevaRecetaRef = push(ref(db, 'recetas'));
-        await set(nuevaRecetaRef, {
-            nombre,
-            rendimiento,
-            precioVenta,
-            ingredientes,
-            stockTerminado: 0
-        });
-
-        document.getElementById('lista-ingredientes-form').innerHTML = '';
-        e.target.reset();
     });
 
-    // 3. Producción (Descuenta insumos proporcionalmente y suma producto terminado)
+    // 3. Producción
     const prodRecetaSelect = document.getElementById('prod-receta');
     const prodCantInput = document.getElementById('prod-cantidad');
 
     function actualizarEstimadoProduccion() {
         const recId = prodRecetaSelect.value;
         const cant = parseFloat(prodCantInput.value) || 0;
-        if (recId && state.recetas[recId]) {
-            const costos = calcularCostoReceta(state.recetas[recId]);
-            document.getElementById('prod-estimado-costo').textContent = `Costo total de esta horneada: ${formatCLP(costos.porUnidad * cant)}`;
+        if (recId && state.recetas[recId] && cant > 0) {
+            const calc = calcularCostoProduccion(state.recetas[recId], cant);
+            document.getElementById('prod-detalle-horno').textContent =
+                `Horno: ${calc.minutos} min | Gas: ${formatCLP(calc.gas)} | Costo total tanda: ${formatCLP(calc.total)}`;
         } else {
-            document.getElementById('prod-estimado-costo').textContent = 'Costo estimado: $0';
+            document.getElementById('prod-detalle-horno').textContent = 'Minutos horno: 25 min | Gas: $0 | Costo tanda: $0';
         }
     }
     prodRecetaSelect.addEventListener('change', actualizarEstimadoProduccion);
@@ -750,44 +790,46 @@
 
     document.getElementById('form-produccion').addEventListener('submit', async (e) => {
         e.preventDefault();
-        const recetaId = prodRecetaSelect.value;
-        const cantidadProducida = parseFloat(prodCantInput.value);
-        const receta = state.recetas[recetaId];
+        try {
+            const recetaId = prodRecetaSelect.value;
+            const cantidadProducida = parseFloat(prodCantInput.value);
+            const receta = state.recetas[recetaId];
+            if (!receta) return;
 
-        if (!receta) return;
+            const factor = cantidadProducida / receta.rendimiento;
 
-        // Factor multiplicador (Ej: si la receta rinde 12 y produje 24, factor = 2)
-        const factor = cantidadProducida / receta.rendimiento;
-
-        // Validar stock suficiente
-        for (const ing of receta.ingredientes) {
-            const insumo = state.insumos[ing.insumoId];
-            const necesario = ing.cantidad * factor;
-            if (!insumo || insumo.stock < necesario) {
-                alert(`Stock insuficiente de "${insumo ? insumo.nombre : 'Insumo'}". Necesitas ${necesario.toFixed(1)} ${insumo?.unidad || ''}.`);
-                return;
+            for (const ing of (receta.ingredientes || [])) {
+                const insumo = state.insumos[ing.insumoId];
+                const necesario = ing.cantidad * factor;
+                if (!insumo || insumo.stock < necesario) {
+                    mostrarAlerta(`Stock insuficiente de "${insumo ? insumo.nombre : 'Insumo'}". Necesitas ${necesario.toFixed(1)} ${insumo?.unidad || ''}.`, 'warning');
+                    return;
+                }
             }
+
+            const updates = {};
+            (receta.ingredientes || []).forEach(ing => {
+                const insumo = state.insumos[ing.insumoId];
+                updates[`insumos/${ing.insumoId}/stock`] = Math.max(0, insumo.stock - (ing.cantidad * factor));
+            });
+            updates[`recetas/${recetaId}/stockTerminado`] = (receta.stockTerminado || 0) + cantidadProducida;
+
+            await update(ref(db), updates);
+            e.target.reset();
+            actualizarEstimadoProduccion();
+            mostrarAlerta(`Producción registrada: +${cantidadProducida} ${receta.nombre} e insumos descontados.`);
+        } catch (err) {
+            mostrarAlerta('Error al registrar producción: ' + err.message, 'danger');
         }
-
-        // Descontar insumos en Firebase
-        const updates = {};
-        receta.ingredientes.forEach(ing => {
-            const insumo = state.insumos[ing.insumoId];
-            const nuevoStock = insumo.stock - (ing.cantidad * factor);
-            updates[`insumos/${ing.insumoId}/stock`] = Math.max(0, nuevoStock);
-        });
-
-        // Aumentar stock terminado
-        const stockActual = receta.stockTerminado || 0;
-        updates[`recetas/${recetaId}/stockTerminado`] = stockActual + cantidadProducida;
-
-        await update(ref(db), updates);
-        alert(`¡Producción registrada! Se sumaron ${cantidadProducida} unidades de ${receta.nombre} y se descontaron los insumos.`);
-        e.target.reset();
-        actualizarEstimadoProduccion();
     });
 
-    // 4. Registrar Venta
+    // 4. Venta + Transporte por KM
+    const ventaKmInput = document.getElementById('venta-km');
+    ventaKmInput.addEventListener('input', () => {
+        const km = parseFloat(ventaKmInput.value) || 0;
+        document.getElementById('venta-costo-km').textContent = `Costo viaje: ${formatCLP(km * COSTO_POR_KM)}`;
+    });
+
     document.getElementById('venta-producto').addEventListener('change', (e) => {
         const opt = e.target.selectedOptions[0];
         if (opt && opt.dataset.precio) {
@@ -798,69 +840,77 @@
 
     document.getElementById('form-venta').addEventListener('submit', async (e) => {
         e.preventDefault();
-        const recetaId = document.getElementById('venta-producto').value;
-        const cantidad = parseFloat(document.getElementById('venta-cantidad').value);
-        const precioUnit = parseFloat(document.getElementById('venta-precio').value);
-        const cliente = document.getElementById('venta-cliente').value.trim();
+        try {
+            const recetaId = document.getElementById('venta-producto').value;
+            const cantidad = parseFloat(document.getElementById('venta-cantidad').value);
+            const precioUnit = parseFloat(document.getElementById('venta-precio').value);
+            const cliente = document.getElementById('venta-cliente').value.trim();
+            const kmViaje = parseFloat(document.getElementById('venta-km').value) || 0;
 
-        const receta = state.recetas[recetaId];
-        if (!receta || (receta.stockTerminado || 0) < cantidad) {
-            alert('No hay suficiente stock terminado para realizar esta venta.');
-            return;
+            const receta = state.recetas[recetaId];
+            if (!receta || (receta.stockTerminado || 0) < cantidad) {
+                mostrarAlerta('Stock terminado insuficiente para esta venta.', 'warning');
+                return;
+            }
+
+            const calc = calcularCostoProduccion(receta, cantidad);
+            const montoTotal = cantidad * precioUnit;
+            const costoViaje = kmViaje * COSTO_POR_KM;
+
+            await update(ref(db, `recetas/${recetaId}`), {
+                stockTerminado: receta.stockTerminado - cantidad
+            });
+
+            await set(push(ref(db, 'movimientos')), {
+                tipo: 'venta',
+                fecha: Date.now(),
+                detalle: receta.nombre,
+                cantidad,
+                precioUnit,
+                montoTotal,
+                costoProduccionTotal: calc.total,
+                kmViaje,
+                costoViaje,
+                cliente
+            });
+
+            e.target.reset();
+            document.getElementById('venta-km').value = 0;
+            document.getElementById('venta-costo-km').textContent = 'Costo viaje: $0';
+            mostrarAlerta(`Venta registrada (${cantidad} unid.) y transporte descontado.`);
+        } catch (err) {
+            mostrarAlerta('Error al registrar venta: ' + err.message, 'danger');
         }
-
-        const costos = calcularCostoReceta(receta);
-        const montoTotal = cantidad * precioUnit;
-        const costoProduccionTotal = cantidad * costos.porUnidad;
-
-        // Descontar stock terminado
-        await update(ref(db, `recetas/${recetaId}`), {
-            stockTerminado: receta.stockTerminado - cantidad
-        });
-
-        // Guardar movimiento
-        await set(push(ref(db, 'movimientos')), {
-            tipo: 'venta',
-            fecha: Date.now(),
-            detalle: receta.nombre,
-            cantidad,
-            precioUnit,
-            montoTotal,
-            costoProduccionTotal,
-            cliente
-        });
-
-        e.target.reset();
     });
 
-    // 5. Registrar Gasto Operativo
+    // 5. Gasto Operativo
     document.getElementById('form-gasto').addEventListener('submit', async (e) => {
         e.preventDefault();
-        const detalle = document.getElementById('gasto-desc').value.trim();
-        const categoria = document.getElementById('gasto-cat').value;
-        const montoTotal = parseFloat(document.getElementById('gasto-monto').value);
+        try {
+            const detalle = document.getElementById('gasto-desc').value.trim();
+            const categoria = document.getElementById('gasto-cat').value;
+            const montoTotal = parseFloat(document.getElementById('gasto-monto').value);
 
-        await set(push(ref(db, 'movimientos')), {
-            tipo: 'gasto',
-            fecha: Date.now(),
-            detalle,
-            categoria,
-            montoTotal
-        });
+            await set(push(ref(db, 'movimientos')), {
+                tipo: 'gasto',
+                fecha: Date.now(),
+                detalle,
+                categoria,
+                montoTotal
+            });
 
-        e.target.reset();
+            e.target.reset();
+            mostrarAlerta('Gasto registrado.');
+        } catch (err) {
+            mostrarAlerta('Error al registrar gasto: ' + err.message, 'danger');
+        }
     });
 
-    // Funciones globales para eliminar
     window.eliminarInsumo = async (id) => {
-        if (confirm('¿Eliminar este insumo del inventario?')) {
-            await remove(ref(db, `insumos/${id}`));
-        }
+        if (confirm('¿Eliminar este insumo?')) await remove(ref(db, `insumos/${id}`));
     };
     window.eliminarReceta = async (id) => {
-        if (confirm('¿Eliminar esta receta?')) {
-            await remove(ref(db, `recetas/${id}`));
-        }
+        if (confirm('¿Eliminar esta receta?')) await remove(ref(db, `recetas/${id}`));
     };
 </script>
 </body>
