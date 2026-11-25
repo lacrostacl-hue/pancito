@@ -219,6 +219,11 @@
                 <i class="bi bi-box-seam me-1"></i> Insumos
             </button>
         </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="tab-flujo" data-bs-toggle="pill" data-bs-target="#pills-flujo" type="button">
+                <i class="bi bi-graph-up me-1"></i> Flujo y Proyección
+            </button>
+        </li>
     </ul>
 
     <div class="tab-content" id="pills-tabContent">
@@ -508,6 +513,139 @@
             </div>
         </div>
 
+        <!-- 5. FLUJO DE CAJA Y PROYECCIÓN MENSUAL -->
+        <div class="tab-pane fade" id="pills-flujo">
+            <div class="row g-4">
+                <!-- Flujo de Caja Mensual -->
+                <div class="col-lg-6">
+                    <div class="card h-100">
+                        <div class="card-header bg-dark text-white fw-bold d-flex justify-content-between align-items-center flex-wrap gap-2">
+                            <span><i class="bi bi-wallet2 me-1"></i> Flujo de Caja Mensual</span>
+                            <input type="month" class="form-control form-control-sm w-auto" id="flujo-mes">
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-2 align-items-end mb-3">
+                                <div class="col-7">
+                                    <label class="form-label small fw-semibold mb-1">Saldo Inicial de Caja ($)</label>
+                                    <input type="number" class="form-control form-control-sm" id="flujo-saldo-inicial" value="0">
+                                </div>
+                                <div class="col-5">
+                                    <button type="button" class="btn btn-sm btn-outline-dark w-100 fw-semibold" id="btn-guardar-saldo-inicial">
+                                        Guardar Saldo
+                                    </button>
+                                </div>
+                            </div>
+
+                            <ul class="list-group list-group-flush mb-3 small">
+                                <li class="list-group-item d-flex justify-content-between px-0">
+                                    <span>Saldo Inicial</span>
+                                    <strong id="flujo-res-inicial">$0</strong>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between px-0 text-success">
+                                    <span>(+) Entradas por Ventas</span>
+                                    <strong id="flujo-res-entradas">$0</strong>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between px-0 text-danger">
+                                    <span>(-) Salidas (Prod. + Transporte + Gastos)</span>
+                                    <strong id="flujo-res-salidas">$0</strong>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between px-0">
+                                    <span>Flujo Neto del Mes</span>
+                                    <strong id="flujo-res-neto">$0</strong>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between px-0 bg-light px-2 rounded-3 fs-6 fw-bold text-primary mt-1">
+                                    <span>Saldo Final de Caja</span>
+                                    <span id="flujo-res-final">$0</span>
+                                </li>
+                            </ul>
+
+                            <div class="table-responsive" style="max-height: 240px;">
+                                <table class="table table-sm table-hover align-middle mb-0 small">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Día</th>
+                                            <th>Movimiento</th>
+                                            <th class="text-end">Flujo</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tabla-flujo-mes"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Proyección Mensual y Punto de Equilibrio -->
+                <div class="col-lg-6">
+                    <div class="card h-100">
+                        <div class="card-header btn-crust fw-bold">
+                            <i class="bi bi-sliders me-1"></i> Proyección Mensual y Equilibrio
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-2">
+                                <label class="form-label small fw-semibold mb-1">Base desde Receta (opcional)</label>
+                                <select class="form-select form-select-sm" id="proy-receta">
+                                    <option value="">Manual / Personalizado</option>
+                                </select>
+                            </div>
+                            <div class="row g-2 mb-2">
+                                <div class="col-4">
+                                    <label class="form-label small fw-semibold mb-1">Días / Mes</label>
+                                    <input type="number" class="form-control form-control-sm" id="proy-dias" value="22" min="1" max="31">
+                                </div>
+                                <div class="col-4">
+                                    <label class="form-label small fw-semibold mb-1">Panes / Día</label>
+                                    <input type="number" class="form-control form-control-sm" id="proy-panes-dia" value="60" min="1">
+                                </div>
+                                <div class="col-4">
+                                    <label class="form-label small fw-semibold mb-1">KM / Día</label>
+                                    <input type="number" step="any" class="form-control form-control-sm" id="proy-km-dia" value="10" min="0">
+                                </div>
+                            </div>
+                            <div class="row g-2 mb-3">
+                                <div class="col-4">
+                                    <label class="form-label small fw-semibold mb-1">Precio Unit. ($)</label>
+                                    <input type="number" class="form-control form-control-sm" id="proy-precio" value="350" min="1">
+                                </div>
+                                <div class="col-4">
+                                    <label class="form-label small fw-semibold mb-1">Costo Unit. ($)</label>
+                                    <input type="number" class="form-control form-control-sm" id="proy-costo-unit" value="120" min="0">
+                                </div>
+                                <div class="col-4">
+                                    <label class="form-label small fw-semibold mb-1">Gastos Fijos ($)</label>
+                                    <input type="number" class="form-control form-control-sm" id="proy-fijos" value="40000" min="0">
+                                </div>
+                            </div>
+
+                            <div class="p-3 bg-light rounded-3 small">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span>Unidades proyectadas al mes:</span>
+                                    <strong id="proy-res-unid">0 unid.</strong>
+                                </div>
+                                <div class="d-flex justify-content-between mb-1 text-success">
+                                    <span>Ventas proyectadas:</span>
+                                    <strong id="proy-res-ventas">$0</strong>
+                                </div>
+                                <div class="d-flex justify-content-between mb-1 text-danger">
+                                    <span>(-) Costos variables + transporte + fijos:</span>
+                                    <strong id="proy-res-egresos">$0</strong>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>Punto de equilibrio mensual:</span>
+                                    <strong id="proy-res-equilibrio">0 unid.</strong>
+                                </div>
+                                <hr class="my-2">
+                                <div class="d-flex justify-content-between fw-bold fs-6 text-primary">
+                                    <span>Utilidad Neta Proyectada:</span>
+                                    <span id="proy-res-utilidad">$0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 </div>
 
@@ -605,7 +743,8 @@
     let state = {
         insumos: {},
         recetas: {},
-        movimientos: {}
+        movimientos: {},
+        configFlujo: { saldoInicial: 0 }
     };
 
     let resumenKPI = {
@@ -625,6 +764,12 @@
     const modalDetalle = new bootstrap.Modal(document.getElementById('modalDetalleKPI'));
     const modalEditarVenta = new bootstrap.Modal(document.getElementById('modalEditarVenta'));
     const formatCLP = (num) => '$' + Math.round(num || 0).toLocaleString('es-CL');
+
+    // Inicializar selector de mes en Flujo de Caja con el mes actual
+    const hoy = new Date();
+    const mesActualStr = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}`;
+    const flujoMesInput = document.getElementById('flujo-mes');
+    flujoMesInput.value = mesActualStr;
 
     function mostrarAlerta(msg, tipo = 'success') {
         const box = document.getElementById('alert-box');
@@ -687,6 +832,7 @@
         state.insumos = data.insumos || {};
         state.recetas = data.recetas || {};
         state.movimientos = data.movimientos || {};
+        state.configFlujo = data.configFlujo || { saldoInicial: 0 };
 
         document.getElementById('connection-status').innerHTML = '<i class="bi bi-circle-fill text-success me-1"></i> En línea';
         renderAll();
@@ -700,6 +846,8 @@
         renderRecetas();
         renderProduccionYStock();
         renderMovimientosYKPIs();
+        renderFlujoCajaMensual();
+        calcularProyeccionMensual();
         actualizarEstimadoProduccion();
     }
 
@@ -743,10 +891,13 @@
     function renderRecetas() {
         const contenedor = document.getElementById('contenedor-recetas');
         const selectProd = document.getElementById('prod-receta');
+        const selectProy = document.getElementById('proy-receta');
         const valorPrevioProd = selectProd.value;
+        const valorPrevioProy = selectProy.value;
 
         contenedor.innerHTML = '';
         selectProd.innerHTML = '<option value="">Selecciona receta...</option>';
+        selectProy.innerHTML = '<option value="">Manual / Personalizado</option>';
 
         const entradas = Object.entries(state.recetas);
         if (entradas.length === 0) {
@@ -761,6 +912,7 @@
             const base = calcularCostoProduccion(rec, rend);
 
             selectProd.innerHTML += `<option value="${id}">${rec.nombre} (Costo unit: ${formatCLP(base.porUnidad)})</option>`;
+            selectProy.innerHTML += `<option value="${id}" data-precio="${rec.precioVenta || 0}" data-costo="${Math.round(base.porUnidad)}">${rec.nombre} (Venta ${formatCLP(rec.precioVenta)} / Costo ${formatCLP(base.porUnidad)})</option>`;
 
             let listaIngHtml = '<ul class="list-unstyled small mb-0">';
             (rec.ingredientes || []).forEach(ing => {
@@ -800,6 +952,7 @@
         });
 
         if (valorPrevioProd) selectProd.value = valorPrevioProd;
+        if (valorPrevioProy) selectProy.value = valorPrevioProy;
     }
 
     function renderProduccionYStock() {
@@ -925,6 +1078,125 @@
         document.getElementById('kpi-utilidad').textContent = formatCLP(utilidadNeta);
         document.getElementById('kpi-margen').textContent = `Margen: ${margen}%`;
     }
+
+    // Flujo de Caja Mensual
+    function renderFlujoCajaMensual() {
+        const mesSeleccionado = flujoMesInput.value || mesActualStr;
+        const saldoInicial = parseFloat(state.configFlujo?.saldoInicial) || 0;
+
+        if (document.activeElement !== document.getElementById('flujo-saldo-inicial')) {
+            document.getElementById('flujo-saldo-inicial').value = saldoInicial;
+        }
+
+        let entradas = 0;
+        let salidas = 0;
+        const filas = [];
+
+        Object.values(state.movimientos).forEach(mov => {
+            const f = new Date(mov.fecha);
+            const ym = `${f.getFullYear()}-${String(f.getMonth() + 1).padStart(2, '0')}`;
+            if (ym !== mesSeleccionado) return;
+
+            const diaStr = f.toLocaleDateString('es-CL', { day: '2-digit', month: '2-digit' });
+
+            if (mov.tipo === 'venta') {
+                const ingreso = mov.montoTotal || 0;
+                const egresoVenta = (mov.costoProduccionTotal || 0) + ((mov.costoViaje !== undefined) ? mov.costoViaje : ((mov.kmViaje || 0) * COSTO_POR_KM));
+                entradas += ingreso;
+                salidas += egresoVenta;
+
+                filas.push({ fecha: mov.fecha, diaStr, desc: `Venta ${mov.detalle}`, monto: ingreso, esEntrada: true });
+                if (egresoVenta > 0) {
+                    filas.push({ fecha: mov.fecha, diaStr, desc: `Costo/Viaje ${mov.detalle}`, monto: -egresoVenta, esEntrada: false });
+                }
+            } else if (mov.tipo === 'gasto') {
+                const gasto = mov.montoTotal || 0;
+                salidas += gasto;
+                filas.push({ fecha: mov.fecha, diaStr, desc: mov.detalle, monto: -gasto, esEntrada: false });
+            }
+        });
+
+        filas.sort((a, b) => b.fecha - a.fecha);
+
+        const flujoNeto = entradas - salidas;
+        const saldoFinal = saldoInicial + flujoNeto;
+
+        document.getElementById('flujo-res-inicial').textContent = formatCLP(saldoInicial);
+        document.getElementById('flujo-res-entradas').textContent = `+${formatCLP(entradas)}`;
+        document.getElementById('flujo-res-salidas').textContent = `-${formatCLP(salidas)}`;
+
+        const netoEl = document.getElementById('flujo-res-neto');
+        netoEl.textContent = `${flujoNeto >= 0 ? '+' : ''}${formatCLP(flujoNeto)}`;
+        netoEl.className = flujoNeto >= 0 ? 'text-success' : 'text-danger';
+
+        document.getElementById('flujo-res-final').textContent = formatCLP(saldoFinal);
+
+        const tbody = document.getElementById('tabla-flujo-mes');
+        tbody.innerHTML = filas.map(r => `
+            <tr>
+                <td class="text-nowrap">${r.diaStr}</td>
+                <td>${r.desc}</td>
+                <td class="text-end fw-semibold ${r.esEntrada ? 'text-success' : 'text-danger'}">
+                    ${r.monto >= 0 ? '+' : ''}${formatCLP(r.monto)}
+                </td>
+            </tr>
+        `).join('') || '<tr><td colspan="3" class="text-muted text-center py-2">Sin movimientos en este mes.</td></tr>';
+    }
+
+    flujoMesInput.addEventListener('change', renderFlujoCajaMensual);
+
+    document.getElementById('btn-guardar-saldo-inicial').addEventListener('click', async () => {
+        try {
+            const nuevoSaldo = parseFloat(document.getElementById('flujo-saldo-inicial').value) || 0;
+            await set(ref(db, 'configFlujo/saldoInicial'), nuevoSaldo);
+            mostrarAlerta('Saldo inicial de caja guardado.');
+        } catch (err) {
+            mostrarAlerta('Error al guardar saldo inicial: ' + err.message, 'danger');
+        }
+    });
+
+    // Proyección Mensual
+    function calcularProyeccionMensual() {
+        const dias = parseFloat(document.getElementById('proy-dias').value) || 0;
+        const panesDia = parseFloat(document.getElementById('proy-panes-dia').value) || 0;
+        const kmDia = parseFloat(document.getElementById('proy-km-dia').value) || 0;
+        const precioUnit = parseFloat(document.getElementById('proy-precio').value) || 0;
+        const costoUnit = parseFloat(document.getElementById('proy-costo-unit').value) || 0;
+        const gastosFijos = parseFloat(document.getElementById('proy-fijos').value) || 0;
+
+        const unidadesMes = dias * panesDia;
+        const ventasMes = unidadesMes * precioUnit;
+        const costosVariablesMes = unidadesMes * costoUnit;
+        const transporteMes = dias * kmDia * COSTO_POR_KM;
+        const egresosTotales = costosVariablesMes + transporteMes + gastosFijos;
+        const utilidadProyectada = ventasMes - egresosTotales;
+
+        const margenUnitario = precioUnit - costoUnit;
+        const costosFijosYViaje = gastosFijos + transporteMes;
+        const equilibrioUnid = margenUnitario > 0 ? Math.ceil(costosFijosYViaje / margenUnitario) : 0;
+
+        document.getElementById('proy-res-unid').textContent = `${unidadesMes.toLocaleString('es-CL')} unid.`;
+        document.getElementById('proy-res-ventas').textContent = formatCLP(ventasMes);
+        document.getElementById('proy-res-egresos').textContent = formatCLP(egresosTotales);
+        document.getElementById('proy-res-equilibrio').textContent = margenUnitario > 0 ? `${equilibrioUnid.toLocaleString('es-CL')} unid.` : 'Precio ≤ Costo';
+
+        const utilEl = document.getElementById('proy-res-utilidad');
+        utilEl.textContent = formatCLP(utilidadProyectada);
+        utilEl.className = utilidadProyectada >= 0 ? 'text-primary' : 'text-danger';
+    }
+
+    document.getElementById('proy-receta').addEventListener('change', (e) => {
+        const opt = e.target.selectedOptions[0];
+        if (opt && opt.value) {
+            document.getElementById('proy-precio').value = opt.dataset.precio || 0;
+            document.getElementById('proy-costo-unit').value = opt.dataset.costo || 0;
+        }
+        calcularProyeccionMensual();
+    });
+
+    ['proy-dias', 'proy-panes-dia', 'proy-km-dia', 'proy-precio', 'proy-costo-unit', 'proy-fijos'].forEach(id => {
+        document.getElementById(id).addEventListener('input', calcularProyeccionMensual);
+    });
 
     // Modal detalle al pinchar cualquier widget KPI
     window.abrirDetalleKPI = (tipo) => {
