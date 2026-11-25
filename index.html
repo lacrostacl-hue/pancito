@@ -314,6 +314,7 @@
                                         <th>Costo Prod.</th>
                                         <th>Transporte</th>
                                         <th>Monto</th>
+                                        <th class="text-end">Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody id="tabla-movimientos"></tbody>
@@ -510,6 +511,61 @@
     </div>
 </div>
 
+<!-- Modal Editar Venta -->
+<div class="modal fade" id="modalEditarVenta" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 rounded-4 shadow">
+            <div class="modal-header bg-success text-white rounded-top-4">
+                <h5 class="modal-title fw-bold"><i class="bi bi-pencil-square me-1"></i> Editar Venta</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="form-editar-venta">
+                <div class="modal-body">
+                    <input type="hidden" id="edit-venta-id">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Producto</label>
+                        <input type="text" class="form-control bg-light" id="edit-venta-producto" readonly>
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label fw-semibold">Unidades Vendidas</label>
+                            <input type="number" class="form-control" id="edit-venta-cantidad" min="1" required>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-semibold">Precio Unit. ($)</label>
+                            <input type="number" class="form-control" id="edit-venta-precio" min="1" required>
+                        </div>
+                    </div>
+                    <div class="row g-2 mb-2">
+                        <div class="col-12 col-sm-6">
+                            <label class="form-label fw-semibold">Cliente / Carro</label>
+                            <input type="text" class="form-control" id="edit-venta-cliente" placeholder="Ej: Carro San Pedro">
+                        </div>
+                        <div class="col-12 col-sm-6">
+                            <label class="form-label fw-semibold">KM Viaje</label>
+                            <input type="number" step="any" min="0" class="form-control" id="edit-venta-km">
+                        </div>
+                    </div>
+                    <div class="p-3 bg-light rounded-3 small mt-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span>Transporte calculado (16 km/L @ $1.500):</span>
+                            <strong class="text-info" id="edit-venta-resumen-km">$0</strong>
+                        </div>
+                        <div class="d-flex justify-content-between fw-bold fs-6">
+                            <span>Total Venta:</span>
+                            <span class="text-success" id="edit-venta-resumen-total">$0</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-success fw-bold">Guardar Cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <!-- Modal Detalle al pinchar cualquier Widget KPI -->
 <div class="modal fade" id="modalDetalleKPI" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
@@ -567,6 +623,7 @@
     };
 
     const modalDetalle = new bootstrap.Modal(document.getElementById('modalDetalleKPI'));
+    const modalEditarVenta = new bootstrap.Modal(document.getElementById('modalEditarVenta'));
     const formatCLP = (num) => '$' + Math.round(num || 0).toLocaleString('es-CL');
 
     function mostrarAlerta(msg, tipo = 'success') {
@@ -577,7 +634,6 @@
     }
     window.cerrarAlerta = () => document.getElementById('alert-box').classList.add('d-none');
 
-    // Respaldo para recetas antiguas o sin datos explícitos
     function obtenerGasGMin(receta) {
         if (receta && typeof receta.gasGMin === 'number' && !isNaN(receta.gasGMin)) {
             return receta.gasGMin;
@@ -811,6 +867,14 @@
                         <td class="text-muted">${formatCLP(costoProd)}</td>
                         <td class="text-info fw-semibold">${km > 0 ? `${km} km (${formatCLP(costoViaje)})` : '$0'}</td>
                         <td class="fw-bold text-success">+${formatCLP(mov.montoTotal)}</td>
+                        <td class="text-end text-nowrap">
+                            <button class="btn btn-sm btn-outline-primary" onclick="abrirEditarVenta('${id}')" title="Editar venta">
+                                <i class="bi bi-pencil-square"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="eliminarMovimiento('${id}')" title="Eliminar registro">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
                     </tr>
                 `;
             } else if (mov.tipo === 'gasto') {
@@ -825,6 +889,11 @@
                         <td>-</td>
                         <td>-</td>
                         <td class="fw-bold text-danger">-${formatCLP(mov.montoTotal)}</td>
+                        <td class="text-end text-nowrap">
+                            <button class="btn btn-sm btn-outline-danger" onclick="eliminarMovimiento('${id}')" title="Eliminar gasto">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
                     </tr>
                 `;
             }
@@ -1121,7 +1190,7 @@
         }
     });
 
-    // 4. Venta + Transporte
+    // 4. Venta + Transporte + Edición de Venta
     const ventaKmInput = document.getElementById('venta-km');
     ventaKmInput.addEventListener('input', () => {
         const km = parseFloat(ventaKmInput.value) || 0;
@@ -1161,6 +1230,7 @@
 
             await set(push(ref(db, 'movimientos')), {
                 tipo: 'venta',
+                recetaId,
                 fecha: Date.now(),
                 detalle: receta.nombre,
                 cantidad,
@@ -1178,6 +1248,86 @@
             mostrarAlerta(`Venta registrada (${cantidad} unid.).`);
         } catch (err) {
             mostrarAlerta('Error al registrar venta: ' + err.message, 'danger');
+        }
+    });
+
+    function actualizarResumenModalVenta() {
+        const cant = parseFloat(document.getElementById('edit-venta-cantidad').value) || 0;
+        const precio = parseFloat(document.getElementById('edit-venta-precio').value) || 0;
+        const km = parseFloat(document.getElementById('edit-venta-km').value) || 0;
+        document.getElementById('edit-venta-resumen-km').textContent = formatCLP(km * COSTO_POR_KM);
+        document.getElementById('edit-venta-resumen-total').textContent = formatCLP(cant * precio);
+    }
+
+    ['edit-venta-cantidad', 'edit-venta-precio', 'edit-venta-km'].forEach(id => {
+        document.getElementById(id).addEventListener('input', actualizarResumenModalVenta);
+    });
+
+    window.abrirEditarVenta = (id) => {
+        const mov = state.movimientos[id];
+        if (!mov || mov.tipo !== 'venta') return;
+
+        const precioUnitActual = mov.precioUnit || (mov.cantidad > 0 ? Math.round((mov.montoTotal || 0) / mov.cantidad) : 0);
+
+        document.getElementById('edit-venta-id').value = id;
+        document.getElementById('edit-venta-producto').value = mov.detalle || 'Producto';
+        document.getElementById('edit-venta-cantidad').value = mov.cantidad || 1;
+        document.getElementById('edit-venta-precio').value = precioUnitActual;
+        document.getElementById('edit-venta-cliente').value = mov.cliente || '';
+        document.getElementById('edit-venta-km').value = mov.kmViaje || 0;
+
+        actualizarResumenModalVenta();
+        modalEditarVenta.show();
+    };
+
+    document.getElementById('form-editar-venta').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        try {
+            const id = document.getElementById('edit-venta-id').value;
+            const movActual = state.movimientos[id];
+            if (!movActual || movActual.tipo !== 'venta') return;
+
+            const nuevaCantidad = parseFloat(document.getElementById('edit-venta-cantidad').value);
+            const nuevoPrecio = parseFloat(document.getElementById('edit-venta-precio').value);
+            const nuevoCliente = document.getElementById('edit-venta-cliente').value.trim();
+            const nuevoKm = parseFloat(document.getElementById('edit-venta-km').value) || 0;
+
+            const recetaId = movActual.recetaId || Object.entries(state.recetas).find(([, r]) => r.nombre === movActual.detalle)?.[0];
+            const receta = recetaId ? state.recetas[recetaId] : null;
+
+            const diferenciaUnidades = nuevaCantidad - (movActual.cantidad || 0);
+            const updates = {};
+
+            if (receta && diferenciaUnidades !== 0) {
+                const stockActual = receta.stockTerminado || 0;
+                const stockResultante = stockActual - diferenciaUnidades;
+                if (stockResultante < 0) {
+                    mostrarAlerta(`Stock insuficiente para aumentar en ${diferenciaUnidades} unid. (disponible: ${stockActual}).`, 'warning');
+                    return;
+                }
+                updates[`recetas/${recetaId}/stockTerminado`] = stockResultante;
+            }
+
+            const costoProd = receta
+                ? calcularCostoProduccion(receta, nuevaCantidad).total
+                : (movActual.cantidad > 0 ? ((movActual.costoProduccionTotal || 0) / movActual.cantidad) * nuevaCantidad : (movActual.costoProduccionTotal || 0));
+
+            updates[`movimientos/${id}`] = {
+                ...movActual,
+                cantidad: nuevaCantidad,
+                precioUnit: nuevoPrecio,
+                montoTotal: nuevaCantidad * nuevoPrecio,
+                costoProduccionTotal: costoProd,
+                kmViaje: nuevoKm,
+                costoViaje: nuevoKm * COSTO_POR_KM,
+                cliente: nuevoCliente
+            };
+
+            await update(ref(db), updates);
+            modalEditarVenta.hide();
+            mostrarAlerta('Venta actualizada correctamente.');
+        } catch (err) {
+            mostrarAlerta('Error al actualizar la venta: ' + err.message, 'danger');
         }
     });
 
@@ -1203,6 +1353,27 @@
             mostrarAlerta('Error al registrar gasto: ' + err.message, 'danger');
         }
     });
+
+    window.eliminarMovimiento = async (id) => {
+        const mov = state.movimientos[id];
+        if (!mov) return;
+        if (!confirm('¿Eliminar este registro del historial?')) return;
+
+        try {
+            const updates = {};
+            if (mov.tipo === 'venta') {
+                const recetaId = mov.recetaId || Object.entries(state.recetas).find(([, r]) => r.nombre === mov.detalle)?.[0];
+                if (recetaId && state.recetas[recetaId]) {
+                    updates[`recetas/${recetaId}/stockTerminado`] = (state.recetas[recetaId].stockTerminado || 0) + (mov.cantidad || 0);
+                }
+            }
+            updates[`movimientos/${id}`] = null;
+            await update(ref(db), updates);
+            mostrarAlerta('Registro eliminado.');
+        } catch (err) {
+            mostrarAlerta('Error al eliminar registro: ' + err.message, 'danger');
+        }
+    };
 
     window.eliminarInsumo = async (id) => {
         if (confirm('¿Eliminar este insumo?')) await remove(ref(db, `insumos/${id}`));
