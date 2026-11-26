@@ -403,7 +403,7 @@
                                 </div>
                                 <div class="row g-2 mb-2">
                                     <div class="col-6">
-                                        <label class="form-label fw-semibold">Rendimiento (Panes)</label>
+                                        <label class="form-label fw-semibold">Rendimiento Tanda (Panes)</label>
                                         <input type="number" class="form-control" id="receta-rendimiento" value="60" min="1" required>
                                     </div>
                                     <div class="col-6">
@@ -575,15 +575,15 @@
                     </div>
                 </div>
 
-                <!-- Proyección Mensual y Punto de Equilibrio -->
+                <!-- Proyección Mensual: Horneadas, Gas (25 kg) y Reposición -->
                 <div class="col-lg-6">
                     <div class="card h-100">
                         <div class="card-header btn-crust fw-bold">
-                            <i class="bi bi-sliders me-1"></i> Proyección Mensual y Equilibrio
+                            <i class="bi bi-sliders me-1"></i> Proyección Mensual, Gas (25 kg) y Reposición
                         </div>
                         <div class="card-body">
                             <div class="mb-2">
-                                <label class="form-label small fw-semibold mb-1">Base desde Receta (opcional)</label>
+                                <label class="form-label small fw-semibold mb-1">Receta Base para Proyectar</label>
                                 <select class="form-select form-select-sm" id="proy-receta">
                                     <option value="">Manual / Personalizado</option>
                                 </select>
@@ -598,25 +598,55 @@
                                     <input type="number" class="form-control form-control-sm" id="proy-panes-dia" value="60" min="1">
                                 </div>
                                 <div class="col-4">
-                                    <label class="form-label small fw-semibold mb-1">KM / Día</label>
-                                    <input type="number" step="any" class="form-control form-control-sm" id="proy-km-dia" value="10" min="0">
+                                    <label class="form-label small fw-semibold mb-1">Panes / Horneada</label>
+                                    <input type="number" class="form-control form-control-sm" id="proy-panes-tanda" value="60" min="1">
                                 </div>
                             </div>
-                            <div class="row g-2 mb-3">
+                            <div class="row g-2 mb-2">
                                 <div class="col-4">
-                                    <label class="form-label small fw-semibold mb-1">Precio Unit. ($)</label>
-                                    <input type="number" class="form-control form-control-sm" id="proy-precio" value="350" min="1">
+                                    <label class="form-label small fw-semibold mb-1">Gas Horno (g/min)</label>
+                                    <input type="number" step="any" class="form-control form-control-sm" id="proy-gas-gmin" value="15" min="0">
                                 </div>
                                 <div class="col-4">
-                                    <label class="form-label small fw-semibold mb-1">Costo Unit. ($)</label>
-                                    <input type="number" class="form-control form-control-sm" id="proy-costo-unit" value="120" min="0">
+                                    <label class="form-label small fw-semibold mb-1">KM / Día</label>
+                                    <input type="number" step="any" class="form-control form-control-sm" id="proy-km-dia" value="10" min="0">
                                 </div>
                                 <div class="col-4">
                                     <label class="form-label small fw-semibold mb-1">Gastos Fijos ($)</label>
                                     <input type="number" class="form-control form-control-sm" id="proy-fijos" value="40000" min="0">
                                 </div>
                             </div>
+                            <div class="row g-2 mb-3">
+                                <div class="col-6">
+                                    <label class="form-label small fw-semibold mb-1">Precio Venta Unit. ($)</label>
+                                    <input type="number" class="form-control form-control-sm" id="proy-precio" value="350" min="1">
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label small fw-semibold mb-1">Reposición Insumos / Pan ($)</label>
+                                    <input type="number" step="any" class="form-control form-control-sm" id="proy-insumos-pan" value="90" min="0">
+                                </div>
+                            </div>
 
+                            <!-- Autonomía de Cilindro de Gas (25 kg) -->
+                            <div class="p-3 rounded-3 mb-3 small border bg-white">
+                                <div class="fw-bold text-dark mb-1">
+                                    <i class="bi bi-fire text-danger me-1"></i> Autonomía Gas (Cilindro 25 kg = $25.000)
+                                </div>
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span>Tiempo por tanda / Gas por tanda:</span>
+                                    <strong id="proy-gas-tanda">25 min · 0 g ($0)</strong>
+                                </div>
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span>Horneadas que rinde 1 cilindro (25.000 g):</span>
+                                    <strong class="text-danger" id="proy-horneadas-cilindro">0 horneadas</strong>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span>Horneadas y cilindros estimados al mes:</span>
+                                    <strong id="proy-cilindros-mes">0 tandas · 0 cil.</strong>
+                                </div>
+                            </div>
+
+                            <!-- Reposición de Mercadería y Resultado -->
                             <div class="p-3 bg-light rounded-3 small">
                                 <div class="d-flex justify-content-between mb-1">
                                     <span>Unidades proyectadas al mes:</span>
@@ -626,9 +656,21 @@
                                     <span>Ventas proyectadas:</span>
                                     <strong id="proy-res-ventas">$0</strong>
                                 </div>
-                                <div class="d-flex justify-content-between mb-1 text-danger">
-                                    <span>(-) Costos variables + transporte + fijos:</span>
-                                    <strong id="proy-res-egresos">$0</strong>
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span>Reposición mercadería (insumos):</span>
+                                    <strong class="text-warning-emphasis" id="proy-res-insumos">-$0</strong>
+                                </div>
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span>Consumo gas mensual (horno):</span>
+                                    <strong class="text-danger" id="proy-res-gas">-$0</strong>
+                                </div>
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span>Transporte mensual (16 km/L @ $1.500):</span>
+                                    <strong class="text-info" id="proy-res-transporte">-$0</strong>
+                                </div>
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span>Gastos fijos mensuales:</span>
+                                    <strong id="proy-res-fijos">-$0</strong>
                                 </div>
                                 <div class="d-flex justify-content-between mb-2">
                                     <span>Punto de equilibrio mensual:</span>
@@ -737,7 +779,9 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    const PRECIO_GAS_POR_GRAMO = 25000 / 25000; // $25.000 por 25 kg = $1/g
+    const GRAMOS_CILINDRO_GAS = 25000;
+    const PRECIO_CILINDRO_GAS = 25000;
+    const PRECIO_GAS_POR_GRAMO = PRECIO_CILINDRO_GAS / GRAMOS_CILINDRO_GAS; // $1/g
     const COSTO_POR_KM = 1500 / 16; // 16 km/L a $1.500/L = $93,75/km
 
     let state = {
@@ -765,7 +809,6 @@
     const modalEditarVenta = new bootstrap.Modal(document.getElementById('modalEditarVenta'));
     const formatCLP = (num) => '$' + Math.round(num || 0).toLocaleString('es-CL');
 
-    // Inicializar selector de mes en Flujo de Caja con el mes actual
     const hoy = new Date();
     const mesActualStr = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}`;
     const flujoMesInput = document.getElementById('flujo-mes');
@@ -795,9 +838,9 @@
         return ((receta?.nombre || '').toLowerCase().includes('completo'));
     }
 
-    function calcularMinutosHorno(receta, cantidadPanes) {
+    function calcularMinutosHorno(esCompleto, cantidadPanes) {
         let minutos = 25;
-        if (aplicaReglaCompleto(receta) && cantidadPanes > 60) {
+        if (esCompleto && cantidadPanes > 60) {
             minutos += 15;
         }
         return minutos;
@@ -817,7 +860,7 @@
             }
         });
 
-        const minutos = calcularMinutosHorno(receta, cantidadPanes);
+        const minutos = calcularMinutosHorno(aplicaReglaCompleto(receta), cantidadPanes);
         const gasGMin = obtenerGasGMin(receta);
         const costoGas = (minutos * gasGMin) * PRECIO_GAS_POR_GRAMO;
 
@@ -910,9 +953,19 @@
             const gasGMin = obtenerGasGMin(rec);
             const esComp = aplicaReglaCompleto(rec);
             const base = calcularCostoProduccion(rec, rend);
+            const insumosPorPan = rend > 0 ? (base.insumos / rend) : 0;
 
             selectProd.innerHTML += `<option value="${id}">${rec.nombre} (Costo unit: ${formatCLP(base.porUnidad)})</option>`;
-            selectProy.innerHTML += `<option value="${id}" data-precio="${rec.precioVenta || 0}" data-costo="${Math.round(base.porUnidad)}">${rec.nombre} (Venta ${formatCLP(rec.precioVenta)} / Costo ${formatCLP(base.porUnidad)})</option>`;
+            selectProy.innerHTML += `
+                <option value="${id}"
+                    data-precio="${rec.precioVenta || 0}"
+                    data-insumos-pan="${insumosPorPan.toFixed(2)}"
+                    data-rendimiento="${rend}"
+                    data-gas-gmin="${gasGMin}"
+                    data-completo="${esComp ? '1' : '0'}">
+                    ${rec.nombre} (Venta ${formatCLP(rec.precioVenta)} / Costo ${formatCLP(base.porUnidad)})
+                </option>
+            `;
 
             let listaIngHtml = '<ul class="list-unstyled small mb-0">';
             (rec.ingredientes || []).forEach(ing => {
@@ -1155,29 +1208,61 @@
         }
     });
 
-    // Proyección Mensual
+    // Proyección Mensual con Gas (25 kg), Horneadas y Reposición de Mercadería
     function calcularProyeccionMensual() {
+        const selectProy = document.getElementById('proy-receta');
+        const opt = selectProy.selectedOptions[0];
+
         const dias = parseFloat(document.getElementById('proy-dias').value) || 0;
         const panesDia = parseFloat(document.getElementById('proy-panes-dia').value) || 0;
+        const panesTanda = Math.max(1, parseFloat(document.getElementById('proy-panes-tanda').value) || 60);
+        const gasGMin = parseFloat(document.getElementById('proy-gas-gmin').value) || 0;
         const kmDia = parseFloat(document.getElementById('proy-km-dia').value) || 0;
-        const precioUnit = parseFloat(document.getElementById('proy-precio').value) || 0;
-        const costoUnit = parseFloat(document.getElementById('proy-costo-unit').value) || 0;
         const gastosFijos = parseFloat(document.getElementById('proy-fijos').value) || 0;
+        const precioUnit = parseFloat(document.getElementById('proy-precio').value) || 0;
+        const insumosPorPan = parseFloat(document.getElementById('proy-insumos-pan').value) || 0;
+
+        const esCompletoProy = opt && opt.value
+            ? opt.dataset.completo === '1'
+            : ((opt?.textContent || '').toLowerCase().includes('completo') || panesTanda >= 60);
+
+        const minutosTanda = calcularMinutosHorno(esCompletoProy, panesTanda);
+        const gramosGasTanda = minutosTanda * gasGMin;
+        const costoGasTanda = gramosGasTanda * PRECIO_GAS_POR_GRAMO;
+        const horneadasPorCilindro = gramosGasTanda > 0 ? Math.floor(GRAMOS_CILINDRO_GAS / gramosGasTanda) : 0;
 
         const unidadesMes = dias * panesDia;
-        const ventasMes = unidadesMes * precioUnit;
-        const costosVariablesMes = unidadesMes * costoUnit;
+        const tandasMes = unidadesMes / panesTanda;
+        const gramosGasMes = tandasMes * gramosGasTanda;
+        const cilindrosMes = gramosGasMes / GRAMOS_CILINDRO_GAS;
+        const costoGasMes = gramosGasMes * PRECIO_GAS_POR_GRAMO;
+
+        const reposicionInsumosMes = unidadesMes * insumosPorPan;
         const transporteMes = dias * kmDia * COSTO_POR_KM;
-        const egresosTotales = costosVariablesMes + transporteMes + gastosFijos;
+        const ventasMes = unidadesMes * precioUnit;
+
+        const gasPorPan = unidadesMes > 0 ? (costoGasMes / unidadesMes) : 0;
+        const costoVariablePorPan = insumosPorPan + gasPorPan;
+        const egresosTotales = reposicionInsumosMes + costoGasMes + transporteMes + gastosFijos;
         const utilidadProyectada = ventasMes - egresosTotales;
 
-        const margenUnitario = precioUnit - costoUnit;
+        const margenUnitario = precioUnit - costoVariablePorPan;
         const costosFijosYViaje = gastosFijos + transporteMes;
         const equilibrioUnid = margenUnitario > 0 ? Math.ceil(costosFijosYViaje / margenUnitario) : 0;
 
+        document.getElementById('proy-gas-tanda').textContent =
+            `${minutosTanda} min · ${Math.round(gramosGasTanda).toLocaleString('es-CL')} g (${formatCLP(costoGasTanda)})`;
+        document.getElementById('proy-horneadas-cilindro').textContent =
+            gramosGasTanda > 0 ? `${horneadasPorCilindro} horneadas` : 'Define g/min';
+        document.getElementById('proy-cilindros-mes').textContent =
+            `${tandasMes.toFixed(1)} tandas · ${cilindrosMes.toFixed(2)} cil.`;
+
         document.getElementById('proy-res-unid').textContent = `${unidadesMes.toLocaleString('es-CL')} unid.`;
         document.getElementById('proy-res-ventas').textContent = formatCLP(ventasMes);
-        document.getElementById('proy-res-egresos').textContent = formatCLP(egresosTotales);
+        document.getElementById('proy-res-insumos').textContent = `-${formatCLP(reposicionInsumosMes)}`;
+        document.getElementById('proy-res-gas').textContent = `-${formatCLP(costoGasMes)}`;
+        document.getElementById('proy-res-transporte').textContent = `-${formatCLP(transporteMes)}`;
+        document.getElementById('proy-res-fijos').textContent = `-${formatCLP(gastosFijos)}`;
         document.getElementById('proy-res-equilibrio').textContent = margenUnitario > 0 ? `${equilibrioUnid.toLocaleString('es-CL')} unid.` : 'Precio ≤ Costo';
 
         const utilEl = document.getElementById('proy-res-utilidad');
@@ -1189,12 +1274,14 @@
         const opt = e.target.selectedOptions[0];
         if (opt && opt.value) {
             document.getElementById('proy-precio').value = opt.dataset.precio || 0;
-            document.getElementById('proy-costo-unit').value = opt.dataset.costo || 0;
+            document.getElementById('proy-insumos-pan').value = opt.dataset.insumosPan || 0;
+            document.getElementById('proy-panes-tanda').value = opt.dataset.rendimiento || 60;
+            document.getElementById('proy-gas-gmin').value = opt.dataset.gasGmin || 15;
         }
         calcularProyeccionMensual();
     });
 
-    ['proy-dias', 'proy-panes-dia', 'proy-km-dia', 'proy-precio', 'proy-costo-unit', 'proy-fijos'].forEach(id => {
+    ['proy-dias', 'proy-panes-dia', 'proy-panes-tanda', 'proy-gas-gmin', 'proy-km-dia', 'proy-fijos', 'proy-precio', 'proy-insumos-pan'].forEach(id => {
         document.getElementById(id).addEventListener('input', calcularProyeccionMensual);
     });
 
